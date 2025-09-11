@@ -9,11 +9,11 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useSession } from "@/hooks/use-session"
 import { useRef, useEffect, useState } from "react"
-import { MessageCircle, Sparkles, Menu, X } from "lucide-react"
+import { MessageCircle, Sparkles, Menu } from "lucide-react"
 
 export default function ChatSessionPage({
   params,
-}: { params: { sessionId: string } | Promise<{ sessionId: string }> }) {
+}: { params: Promise<{ sessionId: string }> }) {
   const router = useRouter()
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -23,13 +23,10 @@ export default function ChatSessionPage({
   useEffect(() => {
     const resolveParams = async () => {
       try {
-        const resolvedParams = await Promise.resolve(params)
+        const resolvedParams = await params
         setSessionId(resolvedParams.sessionId)
       } catch (error) {
-        // If params is not a Promise, handle it synchronously
-        if (params && typeof params === "object" && "sessionId" in params) {
-          setSessionId((params as { sessionId: string }).sessionId)
-        }
+        console.error('Error resolving params:', error)
       }
     }
 
@@ -72,7 +69,7 @@ export default function ChatSessionPage({
 
       return () => clearTimeout(timeoutId)
     }
-  }, [currentSession?.messages?.length]) // Only trigger on message count changes
+  }, [currentSession?.messages]) // Include messages array in dependency
 
   // Scroll to bottom when component mounts (for initial load)
   useEffect(() => {
@@ -83,7 +80,7 @@ export default function ChatSessionPage({
 
       return () => clearTimeout(timeoutId)
     }
-  }, [currentSession?.id]) // Only run when session changes, not messages
+  }, [currentSession]) // Include currentSession in dependency
 
   // Also scroll when loading state changes (for new AI responses)
   useEffect(() => {
@@ -247,7 +244,7 @@ export default function ChatSessionPage({
                 <MessageCircle className="h-6 w-6 md:h-10 md:w-10 text-primary" />
               </div>
               <h2 className="text-xl md:text-3xl font-bold mb-4">Session Not Found</h2>
-              <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6">The chat session you're looking for doesn't exist or has been deleted.</p>
+              <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6">The chat session you&apos;re looking for doesn&apos;t exist or has been deleted.</p>
               <button
                 onClick={handleNewChat}
                 className="inline-flex items-center gap-2 px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-primary-foreground font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl border border-primary/20"
@@ -326,13 +323,13 @@ export default function ChatSessionPage({
                       <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6">Ask me anything about your career goals, job search, skill development, or professional growth.</p>
                       <div className="grid gap-3 text-left">
                         <div className="p-3 md:p-4 bg-card/50 backdrop-blur-md rounded-lg border border-border">
-                          <p className="text-xs md:text-sm text-muted-foreground">"What career path should I choose based on my skills?"</p>
+                          <p className="text-xs md:text-sm text-muted-foreground">&quot;What career path should I choose based on my skills?&quot;</p>
                         </div>
                         <div className="p-3 md:p-4 bg-card/50 backdrop-blur-md rounded-lg border border-border">
-                          <p className="text-xs md:text-sm text-muted-foreground">"How can I improve my resume for tech jobs?"</p>
+                          <p className="text-xs md:text-sm text-muted-foreground">&quot;How can I improve my resume for tech jobs?&quot;</p>
                         </div>
                         <div className="p-3 md:p-4 bg-card/50 backdrop-blur-md rounded-lg border border-border">
-                          <p className="text-xs md:text-sm text-muted-foreground">"What skills should I learn for the future?"</p>
+                          <p className="text-xs md:text-sm text-muted-foreground">&quot;What skills should I learn for the future?&quot;</p>
                         </div>
                       </div>
                     </div>

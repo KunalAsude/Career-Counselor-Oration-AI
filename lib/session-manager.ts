@@ -30,13 +30,13 @@ class SessionManager {
       if (stored) {
         const data = JSON.parse(stored)
         this.sessions = new Map(
-          data.map((session: any) => [
+          data.map((session: ChatSession) => [
             session.id,
             {
               ...session,
               createdAt: new Date(session.createdAt),
               updatedAt: new Date(session.updatedAt),
-              messages: session.messages.map((msg: any) => ({
+              messages: session.messages.map((msg: Message) => ({
                 ...msg,
                 timestamp: new Date(msg.timestamp),
               })),
