@@ -1,18 +1,26 @@
 "use client";
 
-import { getProviders, signIn, getSession } from "next-auth/react";
+import { getProviders, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Github, Chrome, Loader2, Mail, Lock, User } from "lucide-react";
 
+interface Provider {
+  id: string;
+  name: string;
+  type: string;
+  signinUrl: string;
+  callbackUrl: string;
+}
+
 export default function SignInPage() {
-  const [providers, setProviders] = useState<any>(null);
+  const [providers, setProviders] = useState<Record<string, Provider> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [signUpData, setSignUpData] = useState({
@@ -61,7 +69,7 @@ export default function SignInPage() {
       } else if (result?.url) {
         router.push(result.url);
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -86,7 +94,7 @@ export default function SignInPage() {
       } else if (result?.url) {
         router.push(result.url);
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -137,7 +145,7 @@ export default function SignInPage() {
       } else if (result?.url) {
         router.push(result.url);
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -233,8 +241,8 @@ export default function SignInPage() {
                     {/* OAuth Providers */}
                     {providers &&
                       Object.values(providers)
-                        .filter((provider: any) => provider.id !== "credentials")
-                        .map((provider: any) => (
+                        .filter((provider: Provider) => provider.id !== "credentials")
+                        .map((provider: Provider) => (
                           <Button
                             key={provider.name}
                             onClick={() => handleOAuthSignIn(provider.id)}
