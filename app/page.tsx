@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, Sparkles, Users, TrendingUp, Brain, Target, ArrowRight } from "lucide-react";
+import { MessageSquare, Sparkles, Users, TrendingUp, Brain, ArrowRight } from "lucide-react";
 
 export default function HomePage() {
   return (
