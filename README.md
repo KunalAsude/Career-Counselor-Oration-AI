@@ -1,54 +1,79 @@
-# Career Counselor AI - Oration AI Assignment
+# Career Counselor AI
 
-A comprehensive AI-powered career counseling chat application built with Next.js, tRPC, and modern web technologies.
+A modern, responsive career counseling platform built with Next.js and TypeScript, featuring secure user authentication and a professional user interface.
 
-## 🚀 Tech Stack
+## 🚀 Live Demo
 
-- **Framework**: Next.js 15.5.2 with TypeScript
-- **Authentication**: NextAuth.js with Google/GitHub OAuth
+**View the application:** [Career Counselor AI](https://career-counselor-oration-ai.vercel.app) *(Deployed on Vercel)*
+
+## ✨ Key Features
+
+### 🔐 **Authentication System**
+- **Email & Password Registration**: Secure user account creation with password hashing
+- **GitHub OAuth Integration**: One-click login with GitHub accounts
+- **JWT Session Management**: Secure, persistent user sessions
+- **Protected Routes**: Authentication-based access control
+
+### 🎨 **Modern User Interface**
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Glassmorphism Effects**: Modern UI with backdrop blur and transparency
+- **Gradient Backgrounds**: Professional purple-to-pink color scheme
+- **Smooth Animations**: Polished transitions and hover effects
+
+### 👤 **User Management**
+- **Profile Pages**: User dashboard with account information
+- **Session Persistence**: Stay logged in across browser sessions
+- **Account Security**: Protected user data and secure authentication
+
+### 📱 **Professional Design**
+- **Landing Page**: Hero section with feature highlights
+- **Navigation**: Intuitive user flow and page transitions
+- **Loading States**: Professional loading indicators
+- **Error Handling**: User-friendly error messages
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15.5.2 (App Router)
+- **Language**: TypeScript (Strict Mode)
+- **Authentication**: NextAuth.js with JWT Strategy
 - **Database**: PostgreSQL with Prisma ORM
-- **API**: tRPC for type-safe APIs
-- **State Management**: TanStack Query (React Query)
 - **Styling**: Tailwind CSS
-- **UI Components**: ShadCN/UI (to be added)
-- **AI Integration**: OpenAI GPT / Together.ai (to be configured)
+- **UI Components**: ShadCN/UI
+- **Deployment**: Vercel
+- **Database Hosting**: Supabase
 
-## 📋 Project Status
+## 🏗️ Architecture
 
-### ✅ Completed
-- [x] Next.js project setup with TypeScript
-- [x] Prisma schema design (User, ChatSession, Message, Auth tables)
-- [x] NextAuth.js configuration with Google/GitHub providers
-- [x] Database schema with proper relationships
-- [x] Dependencies installation (tRPC, TanStack Query)
+```
+├── app/                    # Next.js App Router
+│   ├── api/auth/          # NextAuth.js API routes
+│   ├── auth/              # Authentication pages
+│   ├── profile/           # User profile page
+│   ├── chat/              # Chat interface (UI ready)
+│   └── page.tsx           # Landing page
+├── components/            # Reusable UI components
+│   ├── ui/               # ShadCN/UI components
+│   └── providers/        # Context providers
+├── lib/                   # Utility libraries
+│   ├── auth.ts           # NextAuth configuration
+│   ├── prisma.ts         # Database client
+│   └── utils.ts          # Helper functions
+└── prisma/               # Database schema
+    └── schema.prisma     # Prisma data models
+```
 
-### 🔄 In Progress
-- [ ] tRPC router setup and API implementation
-- [ ] TanStack Query provider configuration
-- [ ] Basic UI components (login, chat interface)
-- [ ] AI integration for career counseling
-
-### 📝 Todo
-- [ ] Chat functionality implementation
-- [ ] Message persistence and real-time updates
-- [ ] Chat session management
-- [ ] Responsive design and UX improvements
-- [ ] Vercel deployment
-- [ ] Environment setup for production
-
-## 🛠️ Setup Instructions
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm/yarn
+- Node.js 18+
+- npm or yarn
 - PostgreSQL database
-- Google/GitHub OAuth applications
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YourUsername/Career-Counselor-Oration-AI.git
+   git clone https://github.com/KunalAsude/Career-Counselor-Oration-AI.git
    cd Career-Counselor-Oration-AI
    ```
 
@@ -57,159 +82,206 @@ A comprehensive AI-powered career counseling chat application built with Next.js
    npm install
    ```
 
-3. **Environment setup**
+3. **Environment Setup**
    ```bash
    cp .env.example .env.local
    ```
-   Update the environment variables with your actual values.
 
-4. **Database setup**
+   Configure the following environment variables:
+   ```env
+   # Database
+   DATABASE_URL="postgresql://username:password@host:port/database"
+
+   # NextAuth.js
+   NEXTAUTH_URL="http://localhost:3000"
+   NEXTAUTH_SECRET="your-secret-key-here"
+
+   # GitHub OAuth (Optional)
+   GITHUB_CLIENT_ID="your-github-client-id"
+   GITHUB_CLIENT_SECRET="your-github-client-secret"
+   ```
+
+4. **Database Setup**
    ```bash
+   # Generate Prisma client
    npx prisma generate
+
+   # Push schema to database
    npx prisma db push
    ```
 
-5. **Run development server**
+5. **Start Development Server**
    ```bash
    npm run dev
    ```
 
-## 🔐 Authentication Setup
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-The application uses NextAuth.js with the following providers:
-- Google OAuth
-- GitHub OAuth
+## 🔧 Available Scripts
 
-### OAuth Setup Instructions:
-1. **Google OAuth**: Create credentials at [Google Cloud Console](https://console.cloud.google.com/)
-2. **GitHub OAuth**: Create an app at [GitHub Developer Settings](https://github.com/settings/developers)
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+```
 
 ## 🗄️ Database Schema
 
+### User Model
 ```prisma
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  name         String?
-  image        String?
-  accounts     Account[]
-  sessions     Session[]
-  chatSessions ChatSession[]
-}
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  password      String?   // Hashed password for credentials auth
+  image         String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-model ChatSession {
-  id       String    @id @default(uuid())
-  name     String
-  userId   String
-  user     User      @relation(fields: [userId], references: [id])
-  messages Message[]
-}
-
-model Message {
-  id            String      @id @default(uuid())
-  content       String
-  role          String      // 'user' or 'assistant'
-  chatSessionId String
-  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id])
+  accounts      Account[]
+  sessions      Session[]
+  chatSessions  ChatSession[]
 }
 ```
 
-## 🎨 V0.dev UI Generation Prompt
+### Authentication Models
+```prisma
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
-```
-Create a modern career counseling chat application UI with the following requirements:
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-**Layout & Design:**
-- Clean, professional design with a sidebar for chat history
-- Main chat area with message bubbles (user: right-aligned blue, AI: left-aligned gray)
-- Header with user profile dropdown and new chat button
-- Responsive design for mobile and desktop
-- Dark/light theme toggle
+  @@unique([provider, providerAccountId])
+}
 
-**Components needed:**
-1. **Sidebar**: List of previous chat sessions with names and timestamps
-2. **Chat Interface**: Message history with typing indicator and input field
-3. **Login Page**: OAuth buttons for Google/GitHub with professional branding
-4. **Header**: User avatar, settings, and theme toggle
-5. **Message Components**: Different styles for user vs AI messages with timestamps
-
-**Styling:**
-- Use Tailwind CSS
-- Modern glassmorphism/neumorphism effects
-- Smooth animations and transitions
-- Professional color scheme (blues, grays, whites)
-- ShadCN/UI components preferred
-
-**Features to include:**
-- Loading states for messages
-- Empty states for new users
-- Message status indicators
-- Typing indicator animation
-- Mobile-responsive hamburger menu for sidebar
-
-**AI Branding:**
-- Oration AI color scheme and professional feel
-- Career counseling theme with appropriate icons
-- Trust-building design elements
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 ```
 
-## 🔧 Development Workflow
+## 🔐 Authentication Setup
 
-### When to use tRPC vs TanStack Query:
+### GitHub OAuth (Optional)
 
-**tRPC Usage:**
-- API route definitions (after auth setup)
-- Server-side procedures for:
-  - Creating chat sessions
-  - Sending/receiving messages
-  - Fetching chat history
-  - User management
+1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
+2. Create a new OAuth App
+3. Set Authorization callback URL to: `http://localhost:3000/api/auth/callback/github`
+4. Add the Client ID and Client Secret to your `.env.local`
 
-**TanStack Query Usage:**
-- Client-side data fetching and caching
-- Optimistic updates for messages
-- Real-time synchronization
-- Background data refetching
+### Features
+- **Secure Registration**: Password hashing with bcrypt
+- **OAuth Integration**: GitHub social login
+- **Session Security**: JWT-based authentication
+- **Route Protection**: Automatic redirects for unauthenticated users
 
-### Next Implementation Steps:
-1. Set up tRPC routers and procedures
-2. Configure TanStack Query provider
-3. Create basic UI components
-4. Implement AI integration
-5. Add chat functionality
+## 🎨 UI Components
 
-## 📚 Resources
+The application uses ShadCN/UI components with custom styling:
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [tRPC Documentation](https://trpc.io/docs)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [NextAuth.js Documentation](https://next-auth.js.org/)
-- [TanStack Query Documentation](https://tanstack.com/query)
+- **Button**: Primary and secondary action buttons
+- **Card**: Content containers with glassmorphism effects
+- **Input**: Form inputs with validation
+- **Avatar**: User profile images
+- **Badge**: Status indicators
+- **Tabs**: Navigation between sign-in and sign-up
+
+## 📱 Responsive Design
+
+- **Desktop**: Full-width layout with sidebar-ready design
+- **Tablet**: Optimized spacing and touch targets
+- **Mobile**: Single-column layout with collapsible navigation
+- **Accessibility**: WCAG compliant color contrast and keyboard navigation
 
 ## 🚀 Deployment
 
-This application will be deployed on Vercel with:
-- PostgreSQL database (Supabase/Neon)
-- Environment variables configuration
-- OAuth provider setup for production URLs
+### Vercel Deployment
+
+1. **Connect Repository**: Link your GitHub repository to Vercel
+2. **Environment Variables**: Configure production environment variables
+3. **Database**: Set up production PostgreSQL database (Supabase recommended)
+4. **Build Settings**: Next.js 15+ with Node.js 18+
+
+### Production Environment Variables
+```env
+DATABASE_URL="postgresql://..."
+NEXTAUTH_URL="https://your-app.vercel.app"
+NEXTAUTH_SECRET="production-secret-key"
+GITHUB_CLIENT_ID="production-client-id"
+GITHUB_CLIENT_SECRET="production-client-secret"
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Database Connection Error**
+```bash
+# Check database URL in .env.local
+# Ensure PostgreSQL is running
+npx prisma db push
+```
+
+**Authentication Issues**
+```bash
+# Verify NEXTAUTH_SECRET is set
+# Check GitHub OAuth credentials
+# Clear browser cookies and try again
+```
+
+**Build Errors**
+```bash
+# Clear Next.js cache
+rm -rf .next
+npm run build
+```
+
+## 📊 Performance
+
+- **Fast Loading**: Optimized with Next.js App Router
+- **Efficient Bundling**: Tree-shaking and code splitting
+- **Database Optimization**: Indexed queries with Prisma
+- **Image Optimization**: Next.js automatic image optimization
+
+## 🤝 Contributing
+
+This project demonstrates modern full-stack development practices with:
+- TypeScript for type safety
+- Component-based architecture
+- Secure authentication patterns
+- Responsive design principles
+- Database optimization techniques
+
+## 📄 License
+
+This project is part of an assignment submission for Oration AI Software Engineer position.
+
+## 📞 Support
+
+For questions about this application, please refer to the codebase and documentation.
+
+## 📋 Development Roadmap
+
+For detailed project status, architecture decisions, and implementation roadmap, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ---
 
-**Note**: This is an assignment project for Oration AI Software Engineer position. The application demonstrates modern full-stack development practices with AI integration.
+**Built with ❤️ using Next.js, TypeScript, and modern web technologies**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*Last updated: September 11, 2025*
