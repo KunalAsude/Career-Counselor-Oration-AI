@@ -1,103 +1,117 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { sessionManager, type ChatSession, type Message } from "@/lib/session-manager"
+import { useState, useCallback } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { trpc } from "@/lib/trpc-client"
+import { toast } from "sonner"
+
+export interface Message {
+  id: string
+  content: string
+  role: "user" | "assistant"
+  status: "sending" | "sent" | "delivered" | "read"
+  createdAt: Date
+}
+
+export interface ChatSession {
+  id: string
+  name: string
+  createdAt: Date
+  updatedAt: Date
+  messages: Message[]
+  totalMessages?: number
+  hasMore?: boolean
+}
 
 export function useSession(sessionId?: string) {
-  const [currentSession, setCurrentSession] = useState<ChatSession | null>(null)
-  const [sessions, setSessions] = useState<ChatSession[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
 
-  // Load sessions on mount
-  useEffect(() => {
-    setSessions(sessionManager.getAllSessions())
-  }, [])
+  // Get all sessions
+  const { data: sessions = [], isLoading: sessionsLoading } = trpc.chat.getSessions.useQuery()
 
-  // Load specific session
-  useEffect(() => {
-    if (sessionId) {
-      const session = sessionManager.getSession(sessionId)
-      setCurrentSession(session || null)
-    } else {
-      setCurrentSession(null)
-    }
-  }, [sessionId])
-
-  const createNewSession = useCallback(() => {
-    const newSession = sessionManager.createSession()
-    setSessions(sessionManager.getAllSessions())
-    setCurrentSession(newSession)
-    return newSession
-  }, [])
-
-  const addMessage = useCallback(
-    (message: Message) => {
-      if (!currentSession) return
-
-      sessionManager.addMessage(currentSession.id, message)
-
-      // Update local state
-      const updatedSession = sessionManager.getSession(currentSession.id)
-      if (updatedSession) {
-        setCurrentSession(updatedSession)
-        setSessions(sessionManager.getAllSessions())
-      }
-    },
-    [currentSession],
+  // Get specific session
+  const { data: currentSession, isLoading: sessionLoading, error: sessionError, refetch } = trpc.chat.getSession.useQuery(
+    { sessionId: sessionId!, limit: 50, offset: 0 },
+    { enabled: !!sessionId }
   )
+
+  const loadMoreMessages = useCallback(() => {
+    if (currentSession?.hasMore) {
+      // For now, we'll refetch with a larger limit
+      // In a more complex implementation, you'd use infinite query
+      refetch()
+    }
+  }, [currentSession?.hasMore, refetch])
+
+  // Create new session mutation
+  const createSessionMutation = trpc.chat.createSession.useMutation({
+    onSuccess: (newSession) => {
+      queryClient.invalidateQueries({ queryKey: ["chat.getSessions"] })
+      toast.success("New chat session created!")
+      return newSession
+    },
+    onError: (error) => {
+      toast.error("Failed to create session: " + error.message)
+    },
+  })
+
+  // Send message mutation
+  const sendMessageMutation = trpc.chat.sendMessage.useMutation({
+    onSuccess: (result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["chat.getSession"], exact: false })
+      queryClient.invalidateQueries({ queryKey: ["chat.getSessions"] })
+      toast.success("Message sent!")
+    },
+    onError: (error) => {
+      toast.error("Failed to send message: " + error.message)
+    },
+  })
+
+  // Delete session mutation
+  const deleteSessionMutation = trpc.chat.deleteSession.useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat.getSessions"] })
+      toast.success("Session deleted!")
+    },
+    onError: (error) => {
+      toast.error("Failed to delete session: " + error.message)
+    },
+  })
+
+  const createNewSession = useCallback(async (name?: string): Promise<ChatSession> => {
+    const result = await createSessionMutation.mutateAsync({ name })
+    return result as ChatSession
+  }, [createSessionMutation])
 
   const sendMessage = useCallback(
     async (content: string): Promise<void> => {
       if (!currentSession) return
 
-      const userMessage: Message = {
-        id: Date.now().toString(),
+      await sendMessageMutation.mutateAsync({
+        sessionId: currentSession.id,
         content,
-        isUser: true,
-        timestamp: new Date(),
-      }
-
-      addMessage(userMessage)
-      setIsLoading(true)
-
-      // Simulate AI response
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const aiResponse: Message = {
-            id: (Date.now() + 1).toString(),
-            content: generateAIResponse(content),
-            isUser: false,
-            timestamp: new Date(),
-          }
-
-          addMessage(aiResponse)
-          setIsLoading(false)
-          resolve()
-        }, 1500)
       })
     },
-    [currentSession, addMessage],
+    [currentSession, sendMessageMutation]
   )
 
   const deleteSession = useCallback(
     (sessionId: string) => {
-      sessionManager.deleteSession(sessionId)
-      setSessions(sessionManager.getAllSessions())
-
-      if (currentSession?.id === sessionId) {
-        setCurrentSession(null)
-      }
+      deleteSessionMutation.mutate({ sessionId })
     },
-    [currentSession],
+    [deleteSessionMutation]
   )
 
   return {
-    currentSession,
+    currentSession: currentSession || null,
     sessions,
-    isLoading,
+    isLoading: sessionsLoading || sessionLoading || sendMessageMutation.isPending,
+    sessionError: sessionError || null,
     createNewSession,
     sendMessage,
     deleteSession,
+    loadMoreMessages,
+    hasMoreMessages: currentSession?.hasMore || false,
   }
 }
 

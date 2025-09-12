@@ -62,14 +62,52 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/signin",
   },
   callbacks: {
+    signIn: async ({ user, account }) => {
+      // For OAuth providers, ensure user exists in our custom User table
+      if (account?.provider !== "credentials" && user.email) {
+        try {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email }
+          });
+
+          if (!existingUser) {
+            // Create user with the ID from NextAuth
+            await prisma.user.create({
+              data: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                image: user.image,
+              }
+            });
+          } else {
+            // Update the user ID to match NextAuth's ID if different
+            if (existingUser.id !== user.id) {
+              await prisma.user.update({
+                where: { email: user.email },
+                data: { id: user.id }
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error creating/updating user:", error);
+          return false;
+        }
+      }
+      return true;
+    },
     session: async ({ session, token }) => {
       if (session?.user && token?.sub) {
         session.user.id = token.sub
       }
       return session
     },
-    jwt: async ({ token, user }) => {
+    jwt: async ({ token, user, account }) => {
       if (user) {
+        token.sub = user.id
+      }
+      // For OAuth providers, ensure we have the user ID
+      if (account && user) {
         token.sub = user.id
       }
       return token

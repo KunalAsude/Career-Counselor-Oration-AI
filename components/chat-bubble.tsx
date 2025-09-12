@@ -1,15 +1,33 @@
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Bot, User, Sparkles } from "lucide-react"
+import { Bot, User, Sparkles, Check, CheckCheck, Clock } from "lucide-react"
 
 interface ChatBubbleProps {
   message: string
   isUser: boolean
   timestamp?: Date
   isLoading?: boolean
+  status?: "sending" | "sent" | "delivered" | "read"
 }
 
-export function ChatBubble({ message, isUser, timestamp, isLoading }: ChatBubbleProps) {
+export function ChatBubble({ message, isUser, timestamp, isLoading, status }: ChatBubbleProps) {
+  const getStatusIcon = () => {
+    if (!isUser || !status) return null
+
+    switch (status) {
+      case "sending":
+        return <Clock className="h-3 w-3 text-muted-foreground" />
+      case "sent":
+        return <Check className="h-3 w-3 text-muted-foreground" />
+      case "delivered":
+        return <CheckCheck className="h-3 w-3 text-muted-foreground" />
+      case "read":
+        return <CheckCheck className="h-3 w-3 text-blue-500" />
+      default:
+        return null
+    }
+  }
+
   return (
     <div
       className={cn(
@@ -48,11 +66,14 @@ export function ChatBubble({ message, isUser, timestamp, isLoading }: ChatBubble
             <p className="whitespace-pre-wrap leading-relaxed">{message}</p>
           )}
         </div>
-        {timestamp && (
-          <span className="text-xs text-slate-400 mt-2 px-2">
-            {timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </span>
-        )}
+        <div className="flex items-center gap-2 mt-2 px-2">
+          {timestamp && (
+            <span className="text-xs text-slate-400">
+              {timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          )}
+          {getStatusIcon()}
+        </div>
       </div>
 
       {isUser && (

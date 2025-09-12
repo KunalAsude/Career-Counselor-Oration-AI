@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 import { MessageCircle, Plus, Trash2, MoreVertical, ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import type { ChatSession } from "@/lib/session-manager"
+import type { ChatSession } from "@/hooks/use-session"
 
 interface SessionListProps {
   sessions: ChatSession[]

@@ -6,32 +6,32 @@ import { SessionList } from "@/components/session-list"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import { useSession } from "@/hooks/use-session"
+import { useRouter, useParams } from "next/navigation"
+import { useSession as useNextAuthSession } from "next-auth/react"
+import { useSession as useChatSession, type Message } from "@/hooks/use-session"
 import { useRef, useEffect, useState } from "react"
 import { MessageCircle, Sparkles, Menu } from "lucide-react"
+import { TypingIndicator } from "@/components/typing-indicator"
 
-export default function ChatSessionPage({
-  params,
-}: { params: Promise<{ sessionId: string }> }) {
+export default function ChatSessionPage() {
   const router = useRouter()
-  const [sessionId, setSessionId] = useState<string | null>(null)
+  const params = useParams()
+  const { data: session, status } = useNextAuthSession()
+  const sessionId = params.sessionId as string
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  useEffect(() => {
-    const resolveParams = async () => {
-      try {
-        const resolvedParams = await params
-        setSessionId(resolvedParams.sessionId)
-      } catch (error) {
-        console.error('Error resolving params:', error)
-      }
-    }
+  const { currentSession, sessions, isLoading, sessionError, createNewSession, sendMessage, deleteSession } = useChatSession(sessionId)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
 
-    resolveParams()
-  }, [params])
+  // Redirect to signin if not authenticated
+  useEffect(() => {
+    if (status === "loading") return // Still loading
+    if (!session) {
+      router.push("/auth/signin")
+    }
+  }, [session, status, router])
 
   // Mobile detection
   useEffect(() => {
@@ -44,8 +44,12 @@ export default function ChatSessionPage({
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  const { currentSession, sessions, isLoading, createNewSession, sendMessage, deleteSession } = useSession(sessionId || undefined)
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  // Redirect if session not found
+  useEffect(() => {
+    if (sessionError) {
+      router.replace("/chat")
+    }
+  }, [sessionError, router])
 
   const scrollToBottom = (smooth: boolean = true) => {
     if (scrollAreaRef.current) {
@@ -69,7 +73,7 @@ export default function ChatSessionPage({
 
       return () => clearTimeout(timeoutId)
     }
-  }, [currentSession?.messages]) // Include messages array in dependency
+  }, [currentSession?.messages])
 
   // Scroll to bottom when component mounts (for initial load)
   useEffect(() => {
@@ -80,7 +84,7 @@ export default function ChatSessionPage({
 
       return () => clearTimeout(timeoutId)
     }
-  }, [currentSession]) // Include currentSession in dependency
+  }, [currentSession])
 
   // Also scroll when loading state changes (for new AI responses)
   useEffect(() => {
@@ -93,6 +97,20 @@ export default function ChatSessionPage({
     }
   }, [isLoading])
 
+  // Don't render anything while checking authentication
+  if (status === "loading" || !session) {
+    return (
+      <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative overflow-hidden dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-card/50 backdrop-blur-md rounded-full mb-4">
+            <MessageCircle className="h-6 w-6 text-primary animate-pulse" />
+          </div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   const handleSendMessage = async (content: string) => {
     await sendMessage(content)
     // Scroll to bottom immediately after sending message with a slight delay
@@ -104,9 +122,13 @@ export default function ChatSessionPage({
     setTimeout(() => scrollToBottom(), 50)
   }
 
-  const handleNewChat = () => {
-    const newSession = createNewSession()
-    router.push(`/chat/${newSession.id}`)
+  const handleNewChat = async () => {
+    try {
+      const newSession = await createNewSession()
+      router.push(`/chat/${newSession.id}`)
+    } catch (error) {
+      console.error("Failed to create new session:", error)
+    }
   }
 
   const handleDeleteSession = (sessionIdToDelete: string) => {
@@ -126,68 +148,6 @@ export default function ChatSessionPage({
 
   const closeMobileSheet = () => {
     setIsMobileSheetOpen(false)
-  }
-
-  if (!sessionId) {
-    return (
-      <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative overflow-hidden dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
-        {/* Background Effects */}
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 dark:bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 dark:bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        </div>
-
-        <div className="relative z-10 flex h-full">
-          {/* Mobile Menu Button */}
-          {isMobile && (
-            <div className="absolute top-4 left-4 z-20">
-              <Sheet open={isMobileSheetOpen} onOpenChange={setIsMobileSheetOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="bg-card/80 backdrop-blur-md border border-border">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80 p-0 bg-card/95 backdrop-blur-xl border-border">
-                  <div className="h-full">
-                    <SessionList
-                      sessions={sessions}
-                      onNewChat={handleNewChat}
-                      onDeleteSession={handleDeleteSession}
-                      isCollapsed={false}
-                      onToggleCollapse={closeMobileSheet}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-          )}
-
-          {/* Desktop Sidebar */}
-          {!isMobile && (
-            <div className="flex-shrink-0">
-              <SessionList
-                sessions={sessions}
-                onNewChat={handleNewChat}
-                onDeleteSession={handleDeleteSession}
-                isCollapsed={isSidebarCollapsed}
-                onToggleCollapse={toggleSidebar}
-              />
-            </div>
-          )}
-
-          {/* Main Content */}
-          <div className="flex-1 flex items-center justify-center p-4 md:p-8 overflow-hidden">
-            <div className="text-center text-foreground max-w-md">
-              <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-card/50 backdrop-blur-md rounded-full mb-4 md:mb-6">
-                <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-primary animate-pulse" />
-              </div>
-              <h2 className="text-xl md:text-2xl font-bold mb-2">Loading Career Counselor</h2>
-              <p className="text-sm md:text-base text-muted-foreground">Preparing your personalized career guidance...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   if (!currentSession) {
@@ -275,91 +235,92 @@ export default function ChatSessionPage({
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="bg-card/80 backdrop-blur-md border border-border">
                   <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-80 p-0 bg-card/95 backdrop-blur-xl border-border">
-                <div className="h-full">
-                  <SessionList
-                    sessions={sessions}
-                    currentSessionId={sessionId}
-                    onNewChat={handleNewChat}
-                    onDeleteSession={handleDeleteSession}
-                    isCollapsed={false}
-                    onToggleCollapse={closeMobileSheet}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 p-0 bg-card/95 backdrop-blur-xl border-border">
+                  <div className="h-full">
+                    <SessionList
+                      sessions={sessions}
+                      currentSessionId={sessionId}
+                      onNewChat={handleNewChat}
+                      onDeleteSession={handleDeleteSession}
+                      isCollapsed={false}
+                      onToggleCollapse={closeMobileSheet}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          )}
 
-        {/* Desktop Sidebar */}
-        {!isMobile && (
-          <div className="flex-shrink-0">
-            <SessionList
-              sessions={sessions}
-              currentSessionId={sessionId}
-              onNewChat={handleNewChat}
-              onDeleteSession={handleDeleteSession}
-              isCollapsed={isSidebarCollapsed}
-              onToggleCollapse={toggleSidebar}
-            />
-          </div>
-        )}
+          {/* Desktop Sidebar */}
+          {!isMobile && (
+            <div className="flex-shrink-0">
+              <SessionList
+                sessions={sessions}
+                currentSessionId={sessionId}
+                onNewChat={handleNewChat}
+                onDeleteSession={handleDeleteSession}
+                isCollapsed={isSidebarCollapsed}
+                onToggleCollapse={toggleSidebar}
+              />
+            </div>
+          )}
 
-        {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Messages Area */}
-          <div className="flex-1 overflow-hidden">
-            <ScrollArea ref={scrollAreaRef} className="h-full scroll-smooth">
-              <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-                {currentSession.messages.length === 0 ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center text-foreground max-w-md">
-                      <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-card/50 backdrop-blur-md rounded-full mb-4 md:mb-6">
-                        <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-primary" />
-                      </div>
-                      <h3 className="text-xl md:text-2xl font-bold mb-3">Start Your Career Journey</h3>
-                      <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6">Ask me anything about your career goals, job search, skill development, or professional growth.</p>
-                      <div className="grid gap-3 text-left">
-                        <div className="p-3 md:p-4 bg-card/50 backdrop-blur-md rounded-lg border border-border">
-                          <p className="text-xs md:text-sm text-muted-foreground">&quot;What career path should I choose based on my skills?&quot;</p>
+          {/* Main Chat Area */}
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            {/* Messages Area */}
+            <div className="flex-1 overflow-hidden">
+              <ScrollArea ref={scrollAreaRef} className="h-full scroll-smooth">
+                <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+                  {currentSession.messages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center text-foreground max-w-md">
+                        <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-card/50 backdrop-blur-md rounded-full mb-4 md:mb-6">
+                          <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-primary" />
                         </div>
-                        <div className="p-3 md:p-4 bg-card/50 backdrop-blur-md rounded-lg border border-border">
-                          <p className="text-xs md:text-sm text-muted-foreground">&quot;How can I improve my resume for tech jobs?&quot;</p>
-                        </div>
-                        <div className="p-3 md:p-4 bg-card/50 backdrop-blur-md rounded-lg border border-border">
-                          <p className="text-xs md:text-sm text-muted-foreground">&quot;What skills should I learn for the future?&quot;</p>
+                        <h3 className="text-xl md:text-2xl font-bold mb-3">Start Your Career Journey</h3>
+                        <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6">Ask me anything about your career goals, job search, skill development, or professional growth.</p>
+                        <div className="grid gap-3 text-left">
+                          <div className="p-3 md:p-4 bg-card/50 backdrop-blur-md rounded-lg border border-border">
+                            <p className="text-xs md:text-sm text-muted-foreground">&quot;What career path should I choose based on my skills?&quot;</p>
+                          </div>
+                          <div className="p-3 md:p-4 bg-card/50 backdrop-blur-md rounded-lg border border-border">
+                            <p className="text-xs md:text-sm text-muted-foreground">&quot;How can I improve my resume for tech jobs?&quot;</p>
+                          </div>
+                          <div className="p-3 md:p-4 bg-card/50 backdrop-blur-md rounded-lg border border-border">
+                            <p className="text-xs md:text-sm text-muted-foreground">&quot;What skills should I learn for the future?&quot;</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  currentSession.messages.map((message) => (
-                    <ChatBubble
-                      key={message.id}
-                      message={message.content}
-                      isUser={message.isUser}
-                      timestamp={message.timestamp}
-                    />
-                  ))
-                )}
-                {isLoading && <ChatBubble message="" isUser={false} isLoading={true} />}
-              </div>
-            </ScrollArea>
-          </div>
+                  ) : (
+                    currentSession.messages.map((message: Message) => (
+                      <ChatBubble
+                        key={message.id}
+                        message={message.content}
+                        isUser={message.role === "user"}
+                        timestamp={message.createdAt}
+                        status={message.status}
+                      />
+                    ))
+                  )}
+                  <TypingIndicator isVisible={isLoading} />
+                </div>
+              </ScrollArea>
+            </div>
 
-          {/* Chat Input */}
-          <div className="flex-shrink-0 bg-card/80 backdrop-blur-md border-t border-border">
-            <ChatBox
-              onSendMessage={handleSendMessage}
-              disabled={isLoading}
-              placeholder="Ask me about your career goals, job search, or professional development..."
-              onFocus={handleInputFocus}
-            />
+            {/* Chat Input */}
+            <div className="flex-shrink-0 bg-card/80 backdrop-blur-md border-t border-border">
+              <ChatBox
+                onSendMessage={handleSendMessage}
+                disabled={isLoading}
+                placeholder="Ask me about your career goals, job search, or professional development..."
+                onFocus={handleInputFocus}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
