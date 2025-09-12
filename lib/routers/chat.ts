@@ -2,16 +2,6 @@ import { z } from "zod";
 import { protectedProcedure, createTRPCRouter } from "@/lib/trpc";
 import { aiService } from "@/lib/ai-service";
 
-// Define message status constants since Prisma enums aren't being generated
-const MessageStatus = {
-  SENDING: "sending",
-  SENT: "sent",
-  DELIVERED: "delivered",
-  READ: "read",
-} as const;
-
-type MessageStatusType = typeof MessageStatus[keyof typeof MessageStatus];
-
 export const chatRouter = createTRPCRouter({
   // Get all chat sessions for the current user
   getSessions: protectedProcedure.query(async ({ ctx }) => {
@@ -57,7 +47,7 @@ export const chatRouter = createTRPCRouter({
         id: msg.id,
         content: msg.content,
         role: msg.role,
-        status: msg.status as MessageStatusType,
+        status: msg.status,
         createdAt: msg.createdAt,
       })),
     }));
@@ -113,7 +103,7 @@ export const chatRouter = createTRPCRouter({
           id: msg.id,
           content: msg.content,
           role: msg.role,
-          status: msg.status as MessageStatusType,
+          status: msg.status,
           createdAt: msg.createdAt,
         })),
         totalMessages: session._count.messages,
@@ -170,7 +160,7 @@ export const chatRouter = createTRPCRouter({
         data: {
           content: input.content,
           role: "user",
-          status: MessageStatus.SENDING,
+          status: "sending",
           chatSessionId: input.sessionId,
         },
       });
@@ -178,7 +168,7 @@ export const chatRouter = createTRPCRouter({
       // Update status to sent after creation
       await ctx.prisma.message.update({
         where: { id: userMessage.id },
-        data: { status: MessageStatus.SENT },
+        data: { status: "sent" },
       });
 
       // Update session updatedAt
@@ -209,7 +199,6 @@ export const chatRouter = createTRPCRouter({
           data: {
             content: aiResponseContent,
             role: "assistant",
-            status: MessageStatus.SENT,
             chatSessionId: input.sessionId,
           },
         });

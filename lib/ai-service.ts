@@ -46,7 +46,7 @@ class TogetherAIProvider implements AIProvider {
 
   constructor(apiKey: string) {
     this.apiKey = apiKey
-    this.baseURL = "https://api.together.xyz/v1"
+    this.baseURL = process.env.BASE_URL || 'https://api.openai.com/v1'
   }
 
   async generateResponse(messages: Array<{ role: "user" | "assistant"; content: string }>): Promise<string> {
