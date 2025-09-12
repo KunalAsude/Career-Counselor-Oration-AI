@@ -1,124 +1,81 @@
 import OpenAI from "openai"
 
-export interface AIProvider {
-  name: string
-  generateResponse: (messages: Array<{ role: "user" | "assistant"; content: string }>) => Promise<string>
-}
+export class AiService {
+  private client: OpenAI;
 
-class OpenAIProvider implements AIProvider {
-  name = "openai"
-  private client: OpenAI
+  constructor() {
+    const apiKey = process.env.AI_API_KEY;
+    const baseUrl = process.env.BASE_URL;
 
-  constructor(apiKey: string, baseURL?: string) {
+    if (!apiKey) {
+      throw new Error('AI_API_KEY environment variable not set');
+    }
+
     this.client = new OpenAI({
       apiKey,
-      baseURL,
-    })
+      baseURL: baseUrl,
+    });
   }
 
-  async generateResponse(messages: Array<{ role: "user" | "assistant"; content: string }>): Promise<string> {
+  async generateChatCompletion(params: OpenAI.Chat.Completions.ChatCompletionCreateParams): Promise<OpenAI.Chat.Completions.ChatCompletion> {
     try {
-      const completion = await this.client.chat.completions.create({
+      const response = await this.client.chat.completions.create(params);
+      return response as OpenAI.Chat.Completions.ChatCompletion;
+    } catch (error) {
+      console.error('Error generating chat completion:', error);
+      throw error;
+    }
+  }
+
+  async generateCareerAdvice(messages: Array<{ role: "user" | "assistant"; content: string }>): Promise<string> {
+    try {
+      const completion = await this.generateChatCompletion({
         model: process.env.AI_MODEL || "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
-            content: "You are a professional career counselor AI. Provide helpful, empathetic, and practical career advice. Focus on being supportive, actionable, and professional in your responses."
+            content: "You are a professional career counselor AI. Provide complete, well-structured career advice that fully answers the user's question. Use clear sections with headers, bullet points for key information, and brief explanations. Keep responses focused and actionable but ensure they are complete - don't cut off important information. Aim for comprehensive but concise responses that provide real value."
           },
           ...messages
         ],
-        max_tokens: 1000,
+        max_tokens: 600,
         temperature: 0.7,
-      })
+        stream: false, // Ensure we get a non-streaming response
+      });
 
-      return completion.choices[0]?.message?.content || "I apologize, but I couldn't generate a response right now."
-    } catch (error) {
-      console.error("OpenAI API error:", error)
-      throw new Error("Failed to generate AI response")
-    }
-  }
-}
+      // Since we're using stream: false, we can directly access the completion
+      return completion.choices[0]?.message?.content || "I apologize, but I couldn't generate a response right now.";
+    } catch (error: unknown) {
+      console.error("AI Service error:", error);
 
-class TogetherAIProvider implements AIProvider {
-  name = "together"
-  private apiKey: string
-  private baseURL: string
+      // Handle specific error types
+      if (error && typeof error === 'object' && 'status' in error) {
+        const errorWithStatus = error as { status: number };
+        
+        if (errorWithStatus.status === 429) {
+          throw new Error("AI service is currently rate limited. Please try again in a few minutes, or consider upgrading your API plan for higher limits.");
+        }
 
-  constructor(apiKey: string) {
-    this.apiKey = apiKey
-    this.baseURL = process.env.BASE_URL || 'https://api.openai.com/v1'
-  }
+        if (errorWithStatus.status === 401) {
+          throw new Error("AI service authentication failed. Please check your API key configuration.");
+        }
 
-  async generateResponse(messages: Array<{ role: "user" | "assistant"; content: string }>): Promise<string> {
-    try {
-      const response = await fetch(`${this.baseURL}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: process.env.AI_MODEL || "meta-llama/Llama-2-70b-chat-hf",
-          messages: [
-            {
-              role: "system",
-              content: "You are a professional career counselor AI. Provide helpful, empathetic, and practical career advice. Focus on being supportive, actionable, and professional in your responses."
-            },
-            ...messages
-          ],
-          max_tokens: 1000,
-          temperature: 0.7,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Together AI API error: ${response.status}`)
+        if (errorWithStatus.status === 403) {
+          throw new Error("AI service access forbidden. Please check your account permissions.");
+        }
       }
 
-      const data = await response.json()
-      return data.choices[0]?.message?.content || "I apologize, but I couldn't generate a response right now."
-    } catch (error) {
-      console.error("Together AI API error:", error)
-      throw new Error("Failed to generate AI response")
-    }
-  }
-}
-
-class AIService {
-  private provider: AIProvider
-
-  constructor() {
-    const providerType = process.env.AI_PROVIDER?.toLowerCase() || "openai"
-
-    switch (providerType) {
-      case "openai":
-        if (!process.env.AI_API_KEY) {
-          throw new Error("AI_API_KEY environment variable is required for OpenAI provider")
+      if (error && typeof error === 'object' && 'code' in error) {
+        const errorWithCode = error as { code: string };
+        if (errorWithCode.code === 'rate_limit_exceeded') {
+          throw new Error("AI service rate limit exceeded. Please wait before trying again, or switch to a different AI provider.");
         }
-        this.provider = new OpenAIProvider(
-          process.env.AI_API_KEY,
-          process.env.OPENAI_BASE_URL
-        )
-        break
+      }
 
-      case "together":
-        if (!process.env.AI_API_KEY) {
-          throw new Error("AI_API_KEY environment variable is required for Together AI provider")
-        }
-        this.provider = new TogetherAIProvider(process.env.AI_API_KEY)
-        break
-
-      default:
-        throw new Error(`Unsupported AI provider: ${providerType}. Supported providers: openai, together`)
+      throw new Error("Failed to generate AI response. Please try again later.");
     }
-
-    console.log(`AI Service initialized with provider: ${this.provider.name}`)
-  }
-
-  async generateCareerAdvice(messages: Array<{ role: "user" | "assistant"; content: string }>): Promise<string> {
-    return this.provider.generateResponse(messages)
   }
 }
 
 // Export singleton instance
-export const aiService = new AIService()
+export const aiService = new AiService();

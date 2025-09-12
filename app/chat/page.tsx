@@ -17,12 +17,26 @@ import { TypingIndicator } from "@/components/typing-indicator"
 export default function ChatPage() {
   const router = useRouter()
   const { data: session, status } = useNextAuthSession()
-  const { currentSession, sessions, isLoading, createNewSession, sendMessage, deleteSession } = useChatSession()
+  const { currentSession, sessions, isLoading, isSending, createNewSession, sendMessage, deleteSession } = useChatSession()
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const creatingSessionRef = useRef(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false)
+
+  // Load sidebar state from localStorage on mount
+  useEffect(() => {
+    const savedSidebarState = localStorage.getItem('sidebar-collapsed')
+    if (savedSidebarState !== null) {
+      setIsSidebarCollapsed(JSON.parse(savedSidebarState))
+    }
+  }, [])
+
+  // Save sidebar state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', JSON.stringify(isSidebarCollapsed))
+  }, [isSidebarCollapsed])
 
   // Mobile detection - moved to top before any conditional returns
   useEffect(() => {
@@ -65,6 +79,41 @@ export default function ChatPage() {
       }
     }
   }, [currentSession?.messages])
+
+  // Check if user is at bottom of chat
+  useEffect(() => {
+    const scrollContainer = scrollAreaRef.current?.querySelector("[data-slot='scroll-area-viewport']")
+    if (!scrollContainer) return
+
+    const checkScrollPosition = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10 // 10px threshold
+      setShowScrollToBottom(!isAtBottom)
+    }
+
+    // Initial check
+    checkScrollPosition()
+
+    // Add scroll listener
+    scrollContainer.addEventListener('scroll', checkScrollPosition)
+    
+    return () => {
+      scrollContainer.removeEventListener('scroll', checkScrollPosition)
+    }
+  }, [currentSession?.messages])
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector("[data-slot='scroll-area-viewport']")
+      if (scrollContainer) {
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollHeight,
+          behavior: 'smooth'
+        })
+      }
+    }
+  }
 
   // Don't render anything while checking authentication
   if (status === "loading" || !session) {
@@ -225,23 +274,64 @@ export default function ChatPage() {
         )}
 
         {/* Main Chat Area - Full screen on mobile */}
-        <div className={`flex-1 flex flex-col min-w-0 overflow-hidden ${isMobile ? 'pt-12' : ''}`}>
+        <div className={`flex-1 flex flex-col min-w-0 overflow-hidden relative ${isMobile ? 'pt-12' : ''}`}>
           <div className="flex-1 overflow-hidden">
             <ScrollArea ref={scrollAreaRef} className="h-full scroll-smooth">
               <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-                {currentSession.messages.map((message: Message) => (
-                  <ChatBubble
-                    key={message.id}
-                    message={message.content}
-                    isUser={message.role === "user"}
-                    timestamp={message.createdAt}
-                    status={message.status}
-                  />
-                ))}
-                <TypingIndicator isVisible={isLoading} />
+                {currentSession.messages.length === 0 && isSending ? (
+                  <div className="flex items-center justify-center h-full min-h-[400px]">
+                    <div className="text-center">
+                      <div className="inline-flex items-center justify-center w-12 h-12 bg-card/50 backdrop-blur-md rounded-full mb-4">
+                        <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                      </div>
+                      <p className="text-muted-foreground text-sm">Sending message...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {currentSession.messages.map((message: Message, index: number) => (
+                      <ChatBubble
+                        key={message.id}
+                        message={message.content}
+                        isUser={message.role === "user"}
+                        timestamp={message.createdAt}
+                        status={message.status}
+                        isLoading={isSending && message.role === "assistant" && index === currentSession.messages.length - 1}
+                      />
+                    ))}
+                    <TypingIndicator isVisible={isSending} />
+                  </>
+                )}
               </div>
             </ScrollArea>
           </div>
+
+          {/* Scroll to Bottom Button */}
+          {showScrollToBottom && (
+            <div className="absolute bottom-24 right-6 z-20">
+              <Button
+                onClick={scrollToBottom}
+                size="icon"
+                className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90 shadow-xl backdrop-blur-md border border-primary/20 transition-all duration-200 hover:scale-105"
+                aria-label="Scroll to bottom"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              </Button>
+            </div>
+          )}
 
           {/* Chat Input */}
           <div className="flex-shrink-0 bg-card/80 backdrop-blur-md border-t border-border">

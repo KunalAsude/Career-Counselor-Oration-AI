@@ -5,7 +5,7 @@ import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export const createTRPCContext = async (_opts: { req: Request }) => {
+export const createTRPCContext = async () => {
   // Use unstable_getServerSession for App Router
   const session = await unstable_getServerSession(authOptions);
 

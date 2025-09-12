@@ -227,10 +227,17 @@ export const chatRouter = createTRPCRouter({
   deleteSession: protectedProcedure
     .input(z.object({ sessionId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // Allow deletion without ownership check
-      await ctx.prisma.chatSession.deleteMany({
-        where: { id: input.sessionId },
+      // Delete only sessions owned by the current user
+      const result = await ctx.prisma.chatSession.deleteMany({
+        where: {
+          id: input.sessionId,
+          userId: ctx.session.user.id,
+        },
       });
+
+      if (result.count === 0) {
+        throw new Error("Session not found or you don't have permission to delete it");
+      }
 
       return { success: true };
     }),

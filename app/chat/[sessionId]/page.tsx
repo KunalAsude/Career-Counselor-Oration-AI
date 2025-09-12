@@ -112,7 +112,7 @@ export default function ChatSessionPage() {
   }
 
   const handleSendMessage = async (content: string) => {
-    await sendMessage(content)
+    await sendMessage(content) // Use regular sendMessage with TanStack Query caching
     // Scroll to bottom immediately after sending message with a slight delay
     setTimeout(() => scrollToBottom(), 100)
   }
@@ -295,13 +295,14 @@ export default function ChatSessionPage() {
                       </div>
                     </div>
                   ) : (
-                    currentSession.messages.map((message: Message) => (
+                    currentSession.messages.map((message: Message, index: number) => (
                       <ChatBubble
                         key={message.id}
                         message={message.content}
                         isUser={message.role === "user"}
                         timestamp={message.createdAt}
                         status={message.status}
+                        isLoading={isLoading && message.role === "assistant" && index === currentSession.messages.length - 1}
                       />
                     ))
                   )}
