@@ -8,19 +8,37 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { useSession } from "@/hooks/use-session"
+import { useSession as useNextAuthSession } from "next-auth/react"
+import { useSession as useChatSession, type Message } from "@/hooks/use-session"
 import { useRef, useEffect as useLayoutEffect } from "react"
 import { MessageCircle, Menu } from "lucide-react"
+import { TypingIndicator } from "@/components/typing-indicator"
 
 export default function ChatPage() {
   const router = useRouter()
-  const { currentSession, sessions, isLoading, createNewSession, sendMessage, deleteSession } = useSession()
+  const { data: session, status } = useNextAuthSession()
+  const { currentSession, sessions, isLoading, isSending, createNewSession, sendMessage, deleteSession } = useChatSession()
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const creatingSessionRef = useRef(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false)
 
-  // Mobile detection
+  // Load sidebar state from localStorage on mount
+  useEffect(() => {
+    const savedSidebarState = localStorage.getItem('sidebar-collapsed')
+    if (savedSidebarState !== null) {
+      setIsSidebarCollapsed(JSON.parse(savedSidebarState))
+    }
+  }, [])
+
+  // Save sidebar state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', JSON.stringify(isSidebarCollapsed))
+  }, [isSidebarCollapsed])
+
+  // Mobile detection - moved to top before any conditional returns
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
@@ -31,34 +49,97 @@ export default function ChatPage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  // Redirect to signin if not authenticated
+  useEffect(() => {
+    if (status === "loading") return // Still loading
+    if (!session) {
+      router.push("/auth/signin")
+    }
+  }, [session, status, router])
+
   // Create a new session if none exists
   useEffect(() => {
-    if (!currentSession) {
-      const newSession = createNewSession()
-      router.replace(`/chat/${newSession.id}`)
+    if (!currentSession && !isLoading && session && !creatingSessionRef.current) {
+      creatingSessionRef.current = true
+      createNewSession().then((newSession) => {
+        router.replace(`/chat/${newSession.id}`)
+      }).catch((error) => {
+        console.error("Failed to create session:", error)
+        creatingSessionRef.current = false // Reset on error
+      })
     }
-  }, [currentSession, createNewSession, router])
+  }, [currentSession, router, isLoading, session, createNewSession])
 
-  const scrollToBottom = () => {
+  // Auto-scroll to bottom when messages change
+  useLayoutEffect(() => {
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector("[data-slot='scroll-area-viewport']")
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight
       }
     }
+  }, [currentSession?.messages])
+
+  // Check if user is at bottom of chat
+  useEffect(() => {
+    const scrollContainer = scrollAreaRef.current?.querySelector("[data-slot='scroll-area-viewport']")
+    if (!scrollContainer) return
+
+    const checkScrollPosition = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10 // 10px threshold
+      setShowScrollToBottom(!isAtBottom)
+    }
+
+    // Initial check
+    checkScrollPosition()
+
+    // Add scroll listener
+    scrollContainer.addEventListener('scroll', checkScrollPosition)
+    
+    return () => {
+      scrollContainer.removeEventListener('scroll', checkScrollPosition)
+    }
+  }, [currentSession?.messages])
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector("[data-slot='scroll-area-viewport']")
+      if (scrollContainer) {
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollHeight,
+          behavior: 'smooth'
+        })
+      }
+    }
   }
 
-  useLayoutEffect(() => {
-    scrollToBottom()
-  }, [currentSession?.messages])
+  // Don't render anything while checking authentication
+  if (status === "loading" || !session) {
+    return (
+      <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative overflow-hidden dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-card/50 backdrop-blur-md rounded-full mb-4">
+            <MessageCircle className="h-6 w-6 text-primary animate-pulse" />
+          </div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   const handleSendMessage = async (content: string) => {
     await sendMessage(content)
   }
 
-  const handleNewChat = () => {
-    const newSession = createNewSession()
-    router.push(`/chat/${newSession.id}`)
+  const handleNewChat = async () => {
+    try {
+      const newSession = await createNewSession()
+      router.push(`/chat/${newSession.id}`)
+    } catch (error) {
+      console.error("Failed to create new session:", error)
+    }
   }
 
   const handleDeleteSession = (sessionId: string) => {
@@ -193,22 +274,64 @@ export default function ChatPage() {
         )}
 
         {/* Main Chat Area - Full screen on mobile */}
-        <div className={`flex-1 flex flex-col min-w-0 overflow-hidden ${isMobile ? 'pt-12' : ''}`}>
+        <div className={`flex-1 flex flex-col min-w-0 overflow-hidden relative ${isMobile ? 'pt-12' : ''}`}>
           <div className="flex-1 overflow-hidden">
             <ScrollArea ref={scrollAreaRef} className="h-full scroll-smooth">
               <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-                {currentSession.messages.map((message) => (
-                  <ChatBubble
-                    key={message.id}
-                    message={message.content}
-                    isUser={message.isUser}
-                    timestamp={message.timestamp}
-                  />
-                ))}
-                {isLoading && <ChatBubble message="" isUser={false} isLoading={true} />}
+                {currentSession.messages.length === 0 && isSending ? (
+                  <div className="flex items-center justify-center h-full min-h-[400px]">
+                    <div className="text-center">
+                      <div className="inline-flex items-center justify-center w-12 h-12 bg-card/50 backdrop-blur-md rounded-full mb-4">
+                        <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                      </div>
+                      <p className="text-muted-foreground text-sm">Sending message...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {currentSession.messages.map((message: Message, index: number) => (
+                      <ChatBubble
+                        key={message.id}
+                        message={message.content}
+                        isUser={message.role === "user"}
+                        timestamp={message.createdAt}
+                        status={message.status}
+                        isLoading={isSending && message.role === "assistant" && index === currentSession.messages.length - 1}
+                      />
+                    ))}
+                    <TypingIndicator isVisible={isSending} />
+                  </>
+                )}
               </div>
             </ScrollArea>
           </div>
+
+          {/* Scroll to Bottom Button */}
+          {showScrollToBottom && (
+            <div className="absolute bottom-24 right-6 z-20">
+              <Button
+                onClick={scrollToBottom}
+                size="icon"
+                className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90 shadow-xl backdrop-blur-md border border-primary/20 transition-all duration-200 hover:scale-105"
+                aria-label="Scroll to bottom"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              </Button>
+            </div>
+          )}
 
           {/* Chat Input */}
           <div className="flex-shrink-0 bg-card/80 backdrop-blur-md border-t border-border">

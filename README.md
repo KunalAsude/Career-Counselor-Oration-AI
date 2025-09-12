@@ -19,17 +19,27 @@ A modern, responsive career counseling platform built with Next.js and TypeScrip
 - **Glassmorphism Effects**: Modern UI with backdrop blur and transparency
 - **Gradient Backgrounds**: Professional purple-to-pink color scheme
 - **Smooth Animations**: Polished transitions and hover effects
+- **Message Status Indicators**: Visual feedback for message delivery states
+- **Real-time Typing Indicators**: Shows when AI is generating responses
 
 ### 👤 **User Management**
 - **Profile Pages**: User dashboard with account information
 - **Session Persistence**: Stay logged in across browser sessions
 - **Account Security**: Protected user data and secure authentication
 
+### 💬 **Advanced Chat Features**
+- **AI Career Counseling**: Intelligent responses powered by OpenAI/Together AI
+- **Message Persistence**: All conversations saved to database
+- **Chat Session Management**: Create, view, and manage multiple conversations
+- **Real-time Status Updates**: Message delivery and read status indicators
+- **Typing Indicators**: Visual feedback during AI response generation
+- **Performance Optimized**: Efficient caching and pagination for large chat histories
+
 ### 📱 **Professional Design**
 - **Landing Page**: Hero section with feature highlights
 - **Navigation**: Intuitive user flow and page transitions
-- **Loading States**: Professional loading indicators
-- **Error Handling**: User-friendly error messages
+- **Loading States**: Professional loading indicators and typing animations
+- **Error Handling**: User-friendly error messages and recovery
 
 ## 🛠️ Tech Stack
 
@@ -95,6 +105,11 @@ A modern, responsive career counseling platform built with Next.js and TypeScrip
    # NextAuth.js
    NEXTAUTH_URL="http://localhost:3000"
    NEXTAUTH_SECRET="your-secret-key-here"
+
+   # AI Provider Configuration
+   AI_PROVIDER="openai"  # or "together"
+   AI_API_KEY="your-ai-api-key-here"
+   AI_MODEL="gpt-3.5-turbo"
 
    # GitHub OAuth (Optional)
    GITHUB_CLIENT_ID="your-github-client-id"
@@ -259,7 +274,44 @@ npm run build
 - **Database Optimization**: Indexed queries with Prisma
 - **Image Optimization**: Next.js automatic image optimization
 
-## 🤝 Contributing
+## � AI Configuration
+
+The application supports multiple AI providers for flexible deployment:
+
+### Supported Providers
+
+1. **OpenAI** (`AI_PROVIDER=openai`)
+   - Models: GPT-3.5-turbo, GPT-4, GPT-4-turbo
+   - Environment: `AI_API_KEY`, `AI_MODEL`
+
+2. **Together AI** (`AI_PROVIDER=together`)
+   - Free tier available
+   - Models: Llama, Mixtral, and other open-source models
+   - Environment: `AI_API_KEY`, `AI_MODEL`
+
+### Adding New Providers
+
+The AI service is designed to be extensible. To add a new provider:
+
+1. Create a new class implementing the `AIProvider` interface
+2. Add it to the `AIService` constructor
+3. Set the appropriate environment variables
+
+### Example Configuration
+
+```env
+# Use OpenAI with GPT-4
+AI_PROVIDER=openai
+AI_API_KEY=sk-your-key-here
+AI_MODEL=gpt-4
+
+# Use Together AI with Llama
+AI_PROVIDER=together
+AI_API_KEY=your-together-key-here
+AI_MODEL=meta-llama/Llama-2-70b-chat-hf
+```
+
+## �🤝 Contributing
 
 This project demonstrates modern full-stack development practices with:
 - TypeScript for type safety

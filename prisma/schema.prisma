@@ -78,18 +78,27 @@ model ChatSession {
 }
 
 model Message {
-  id            String      @id @default(uuid())
+  id            String         @id @default(uuid())
   content       String
   role          MessageRole
-  createdAt     DateTime    @default(now())
+  status        MessageStatus  @default(sent)
+  createdAt     DateTime       @default(now())
   chatSessionId String
-  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  chatSession   ChatSession    @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
 
-  @@index([chatSessionId])
-  @@index([createdAt])
+  @@index([chatSessionId, createdAt])
+  @@index([role])
+  @@index([status])
 }
 
 enum MessageRole {
   user
   assistant
+}
+
+enum MessageStatus {
+  sending
+  sent
+  delivered
+  read
 }
