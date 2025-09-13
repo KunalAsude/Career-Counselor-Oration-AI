@@ -36,20 +36,16 @@ A comprehensive, full-stack career counseling platform built with Next.js 15, Ty
 ## 📸 Screenshots
 
 ### Desktop Interface
-![Chat Interface](https://via.placeholder.com/800x600/4f46e5/ffffff?text=Chat+Interface+Screenshot)
-*Main chat interface showing AI career counseling conversation*
+![Chat Interface](public/ss/chat-carrerai.png)
 
 ### Mobile Responsive Design
-![Mobile View](https://via.placeholder.com/400x800/4f46e5/ffffff?text=Mobile+View+Screenshot)
-*Mobile-optimized interface with collapsible sidebar*
+![Mobile View](public/ss/mobile-careerai.png)
 
 ### Authentication Pages
-![Sign In](https://via.placeholder.com/800x600/4f46e5/ffffff?text=Sign+In+Page+Screenshot)
-*Professional authentication interface with multiple login options*
+![Sign In](public/ss/auth-carrerai.png)
 
 ### Chat History Management
-![Chat Sessions](https://via.placeholder.com/800x600/4f46e5/ffffff?text=Chat+History+Screenshot)
-*Session management showing multiple conversation threads*
+![Chat Sessions](public/ss/history-carrerai.png)
 
 ## 🛠️ Tech Stack
 
