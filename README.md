@@ -36,19 +36,19 @@ A comprehensive, full-stack career counseling platform built with Next.js 15, Ty
 ## 📸 Screenshots
 
 ### Desktop Interface
-![Chat Interface](https://via.placeholder.com/800x600/4f46e5/ffffff?text=Chat+Interface+Screenshot)
+![Chat Interface](<img width="1917" height="907" alt="image" src="https://github.com/user-attachments/assets/a4e37a33-9d4d-4fcf-bb54-0f8f56e13572" />)
 *Main chat interface showing AI career counseling conversation*
 
 ### Mobile Responsive Design
-![Mobile View](https://via.placeholder.com/400x800/4f46e5/ffffff?text=Mobile+View+Screenshot)
+![Mobile View](<img width="358" height="786" alt="image" src="https://github.com/user-attachments/assets/0182eb8f-c5d2-4346-b247-8c07975493ad" />)
 *Mobile-optimized interface with collapsible sidebar*
 
 ### Authentication Pages
-![Sign In](https://via.placeholder.com/800x600/4f46e5/ffffff?text=Sign+In+Page+Screenshot)
+![Sign In](<img width="1919" height="906" alt="image" src="https://github.com/user-attachments/assets/6fbe42c6-e8ba-43d3-a4fc-b24ac7a051d1" />)
 *Professional authentication interface with multiple login options*
 
 ### Chat History Management
-![Chat Sessions](https://via.placeholder.com/800x600/4f46e5/ffffff?text=Chat+History+Screenshot)
+![Chat Sessions](<img width="1918" height="906" alt="image" src="https://github.com/user-attachments/assets/b5bee81e-44a7-4ffd-8f2d-1ba2d69ce6cc" />)
 *Session management showing multiple conversation threads*
 
 ## 🛠️ Tech Stack
