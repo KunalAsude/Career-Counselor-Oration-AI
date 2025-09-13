@@ -168,11 +168,11 @@ export default function SignInPage() {
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 bg-card/50 backdrop-blur-sm border border-border rounded-full px-4 py-2">
                 <Github className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">AI-Powered Career Guidance</span>
+                <span className="text-sm font-medium text-foreground">Smart Career Guidance</span>
               </div>
 
               <h1 className="text-5xl font-bold text-foreground leading-tight">
-                Your AI Career
+                Your Career
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/80 dark:from-purple-400 dark:to-pink-400">
                   {" "}Counselor
                 </span>
@@ -180,7 +180,7 @@ export default function SignInPage() {
 
               <p className="text-xl text-muted-foreground leading-relaxed">
                 Get personalized career advice, resume help, interview preparation, and professional guidance
-                from our advanced AI counselor. Available 24/7 to support your career journey.
+                from our advanced counselor. Available 24/7 to support your career journey.
               </p>
             </div>
 
@@ -188,8 +188,8 @@ export default function SignInPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4">
                 <Chrome className="h-8 w-8 text-primary mb-2" />
-                <h3 className="font-semibold text-foreground mb-1">Smart AI</h3>
-                <p className="text-sm text-muted-foreground">Advanced AI for personalized advice</p>
+                <h3 className="font-semibold text-foreground mb-1">Smart Counselor</h3>
+                <p className="text-sm text-muted-foreground">Advanced counselor for personalized advice</p>
               </div>
               <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4">
                 <User className="h-8 w-8 text-primary mb-2" />
@@ -201,31 +201,31 @@ export default function SignInPage() {
 
           {/* Right Side - Auth Form */}
           <div className="w-full max-w-md mx-auto lg:mx-0 mt-5">
-            <Card className="bg-card/95 backdrop-blur-xl border-border shadow-2xl shadow-primary/20 dark:bg-white/95 dark:shadow-purple-500/20">
+            <Card className="bg-card/95 backdrop-blur-xl border-border shadow-2xl shadow-primary/20">
               <CardHeader className="text-center pb-2">
                 <div className="flex items-center justify-center gap-2 mb-4">
-                  <div className="w-12 h-12 bg-primary dark:bg-gradient-to-r dark:from-purple-600 dark:to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
                     <span className="text-primary-foreground font-bold text-xl">C</span>
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-foreground">Career Counselor AI</h1>
-                    <p className="text-sm text-muted-foreground">Your AI Career Guide</p>
+                    <h1 className="text-2xl font-bold text-foreground">Career Counselor</h1>
+                    <p className="text-sm text-foreground/90">Your Career Guide</p>
                   </div>
                 </div>
               </CardHeader>
 
               <CardContent className="px-6">
                 <Tabs defaultValue="signin" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-muted/50 border border-border p-1 rounded-lg backdrop-blur-sm">
+                  <TabsList className="grid w-full grid-cols-2 bg-muted/30 border border-border p-1 rounded-lg backdrop-blur-sm h-12">
                     <TabsTrigger
                       value="signin"
-                      className="rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border transition-all duration-200 text-muted-foreground data-[state=active]:font-medium"
+                      className="rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border transition-all duration-200 text-foreground/80 data-[state=active]:font-medium h-10 flex items-center justify-center"
                     >
                       Sign In
                     </TabsTrigger>
                     <TabsTrigger
                       value="signup"
-                      className="rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border transition-all duration-200 text-muted-foreground data-[state=active]:font-medium"
+                      className="rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border transition-all duration-200 text-foreground/80 data-[state=active]:font-medium h-10 flex items-center justify-center"
                     >
                       Sign Up
                     </TabsTrigger>
@@ -247,7 +247,7 @@ export default function SignInPage() {
                             key={provider.name}
                             onClick={() => handleOAuthSignIn(provider.id)}
                             disabled={loading}
-                            className="w-full bg-card hover:bg-card/80 text-card-foreground border border-border h-12 shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm"
+                            className="w-full bg-background hover:bg-accent text-foreground border border-border h-12 shadow-sm hover:shadow-md transition-all duration-200"
                             variant="outline"
                           >
                             {loading ? (
@@ -266,7 +266,7 @@ export default function SignInPage() {
                         <span className="w-full border-t border-border" />
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-3 text-muted-foreground font-medium">Or continue with email</span>
+                        <span className="bg-card px-3 text-foreground/80 font-medium">Or continue with email</span>
                       </div>
                     </div>
 
@@ -275,12 +275,12 @@ export default function SignInPage() {
                       <div className="space-y-2">
                         <Label htmlFor="signin-email" className="text-foreground font-medium">Email</Label>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
                           <Input
                             id="signin-email"
                             type="email"
                             placeholder="Enter your email"
-                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground"
+                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-foreground/60"
                             value={signInData.email}
                             onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
                             required
@@ -291,12 +291,12 @@ export default function SignInPage() {
                       <div className="space-y-2">
                         <Label htmlFor="signin-password" className="text-foreground font-medium">Password</Label>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
                           <Input
                             id="signin-password"
                             type="password"
                             placeholder="Enter your password"
-                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground"
+                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-foreground/60"
                             value={signInData.password}
                             onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
                             required
@@ -306,7 +306,7 @@ export default function SignInPage() {
 
                       <Button
                         type="submit"
-                        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-200 dark:bg-gradient-to-r dark:from-purple-600 dark:to-pink-600 dark:hover:from-purple-700 dark:hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={loading}
                       >
                         {loading ? (
@@ -332,12 +332,12 @@ export default function SignInPage() {
                       <div className="space-y-2">
                         <Label htmlFor="signup-name" className="text-foreground font-medium">Full Name</Label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
                           <Input
                             id="signup-name"
                             type="text"
                             placeholder="Enter your full name"
-                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground"
+                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-foreground/60"
                             value={signUpData.name}
                             onChange={(e) => setSignUpData({ ...signUpData, name: e.target.value })}
                             required
@@ -348,12 +348,12 @@ export default function SignInPage() {
                       <div className="space-y-2">
                         <Label htmlFor="signup-email" className="text-foreground font-medium">Email</Label>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
                           <Input
                             id="signup-email"
                             type="email"
                             placeholder="Enter your email"
-                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground"
+                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-foreground/60"
                             value={signUpData.email}
                             onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
                             required
@@ -364,12 +364,12 @@ export default function SignInPage() {
                       <div className="space-y-2">
                         <Label htmlFor="signup-password" className="text-foreground font-medium">Password</Label>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
                           <Input
                             id="signup-password"
                             type="password"
                             placeholder="Create a password"
-                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground"
+                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-foreground/60"
                             value={signUpData.password}
                             onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
                             required
@@ -380,12 +380,12 @@ export default function SignInPage() {
                       <div className="space-y-2">
                         <Label htmlFor="signup-confirm-password" className="text-foreground font-medium">Confirm Password</Label>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
                           <Input
                             id="signup-confirm-password"
                             type="password"
                             placeholder="Confirm your password"
-                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground"
+                            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary transition-colors bg-background text-foreground placeholder:text-foreground/60"
                             value={signUpData.confirmPassword}
                             onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })}
                             required
@@ -395,7 +395,7 @@ export default function SignInPage() {
 
                       <Button
                         type="submit"
-                        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-200 dark:bg-gradient-to-r dark:from-purple-600 dark:to-pink-600 dark:hover:from-purple-700 dark:hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={loading}
                       >
                         {loading ? (
@@ -409,7 +409,7 @@ export default function SignInPage() {
                       </Button>
                     </form>
 
-                    <div className="text-center text-sm text-muted-foreground mt-6">
+                    <div className="text-center text-sm text-foreground/80 mt-6">
                       By signing up, you agree to our{" "}
                       <a href="#" className="text-primary hover:text-primary/80 font-medium transition-colors underline-offset-4 hover:underline">
                         Terms of Service

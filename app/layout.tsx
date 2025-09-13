@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Career Counselor AI - Oration AI",
-  description: "AI-powered career counseling chat application",
+  title: "Career Counselor - Oration AI",
+  description: "Smart career counseling chat application",
 };
 
 export default function RootLayout({
@@ -44,7 +44,17 @@ export default function RootLayout({
               <main>
                 {children}
               </main>
-              <Toaster />
+              <Toaster 
+                position="top-right"
+                toastOptions={{
+                  style: {
+                    background: '#000000',
+                    color: '#ffffff',
+                    border: '1px solid #333333',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)',
+                  },
+                }}
+              />
             </TRPCProvider>
           </SessionProvider>
         </ThemeProvider>

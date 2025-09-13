@@ -18,11 +18,11 @@ export default function HomePage() {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm border border-primary/20 rounded-full px-4 py-2 mb-8">
             <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">AI-Powered Career Guidance</span>
+            <span className="text-sm font-medium text-foreground">Smart Career Guidance</span>
           </div>
 
           <h2 className="text-6xl font-bold text-foreground leading-tight mb-6">
-            Your AI Career
+            Your Career
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/80 block">
               Counselor
             </span>
@@ -30,7 +30,7 @@ export default function HomePage() {
 
           <p className="text-xl text-muted-foreground leading-relaxed mb-8 max-w-3xl mx-auto">
             Get personalized career advice, resume help, interview preparation, and professional guidance
-            from our advanced AI counselor. Available 24/7 to support your career journey.
+            from our advanced counselor. Available 24/7 to support your career journey.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -63,11 +63,11 @@ export default function HomePage() {
           <Card className="bg-card/50 backdrop-blur-xl border-border text-card-foreground hover:bg-card/80 transition-all duration-300 group">
             <CardHeader>
               <Brain className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform" />
-              <CardTitle className="text-xl">Smart AI</CardTitle>
+              <CardTitle className="text-xl">Smart Counselor</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription className="text-muted-foreground text-base">
-                Advanced AI that understands your unique career situation and provides tailored recommendations
+                Advanced counselor that understands your unique career situation and provides tailored recommendations
               </CardDescription>
             </CardContent>
           </Card>
@@ -79,7 +79,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <CardDescription className="text-muted-foreground text-base">
-                Access your AI counselor anytime, anywhere. Continue conversations and get instant responses
+                Access your counselor anytime, anywhere. Continue conversations and get instant responses
               </CardDescription>
             </CardContent>
           </Card>
@@ -91,7 +91,7 @@ export default function HomePage() {
             Ready to Advance Your Career?
           </h3>
           <p className="text-muted-foreground mb-6 text-lg">
-            Join thousands of professionals who have transformed their careers with AI-powered guidance.
+            Join thousands of professionals who have transformed their careers with smart guidance.
           </p>
           <Link href="/auth/signin">
             <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-lg px-8 py-4 shadow-2xl hover:shadow-primary/25 transition-all duration-300">
@@ -109,10 +109,10 @@ export default function HomePage() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <MessageSquare className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">Career Counselor AI</span>
+            <span className="text-xl font-bold text-foreground">Career Counselor</span>
           </div>
           <p className="text-muted-foreground">
-            Empowering careers with AI-powered guidance • Made with ❤️ for career success
+            Empowering careers with smart guidance for career success
           </p>
         </div>
       </footer>

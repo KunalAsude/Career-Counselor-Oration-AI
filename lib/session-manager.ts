@@ -118,6 +118,15 @@ class SessionManager {
     this.saveToStorage()
   }
 
+  renameSession(sessionId: string, newTitle: string): void {
+    const session = this.sessions.get(sessionId)
+    if (!session) return
+
+    session.title = newTitle
+    session.updatedAt = new Date()
+    this.saveToStorage()
+  }
+
   deleteSession(sessionId: string): void {
     this.sessions.delete(sessionId)
     this.saveToStorage()

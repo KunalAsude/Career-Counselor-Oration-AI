@@ -1,23 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useLayoutEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useSession as useNextAuthSession } from "next-auth/react"
+import { useSession as useChatSession, type Message } from "@/hooks/use-session"
 import { ChatBubble } from "@/components/chat-bubble"
 import { ChatBox } from "@/components/chat-box"
 import { SessionList } from "@/components/session-list"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import { useSession as useNextAuthSession } from "next-auth/react"
-import { useSession as useChatSession, type Message } from "@/hooks/use-session"
-import { useRef, useEffect as useLayoutEffect } from "react"
 import { MessageCircle, Menu } from "lucide-react"
 import { TypingIndicator } from "@/components/typing-indicator"
 
 export default function ChatPage() {
   const router = useRouter()
   const { data: session, status } = useNextAuthSession()
-  const { currentSession, sessions, isLoading, isSending, createNewSession, sendMessage, deleteSession } = useChatSession()
+  const { currentSession, sessions, isLoading, isSending, createNewSession, sendMessage, deleteSession, renameSession } = useChatSession()
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const creatingSessionRef = useRef(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -59,7 +58,7 @@ export default function ChatPage() {
 
   // Create a new session if none exists
   useEffect(() => {
-    if (!currentSession && !isLoading && session && !creatingSessionRef.current) {
+    if (!currentSession && !isLoading && session && !creatingSessionRef.current && sessions && sessions.length === 0) {
       creatingSessionRef.current = true
       createNewSession().then((newSession) => {
         router.replace(`/chat/${newSession.id}`)
@@ -68,7 +67,7 @@ export default function ChatPage() {
         creatingSessionRef.current = false // Reset on error
       })
     }
-  }, [currentSession, router, isLoading, session, createNewSession])
+  }, [currentSession, router, isLoading, session, createNewSession, sessions])
 
   // Auto-scroll to bottom when messages change
   useLayoutEffect(() => {
@@ -144,9 +143,25 @@ export default function ChatPage() {
 
   const handleDeleteSession = (sessionId: string) => {
     deleteSession(sessionId)
+    
+    // If we're deleting the current session, redirect to the first available session or history
     if (currentSession?.id === sessionId) {
-      router.push("/chat")
+      if (sessions && sessions.length > 1) {
+        // Find the first session that's not the one being deleted
+        const nextSession = sessions.find(s => s.id !== sessionId)
+        if (nextSession) {
+          router.push(`/chat/${nextSession.id}`)
+        } else {
+          router.push("/history")
+        }
+      } else {
+        router.push("/history")
+      }
     }
+  }
+
+  const handleRenameSession = (sessionId: string, newTitle: string) => {
+    renameSession(sessionId, newTitle)
   }
 
   const toggleSidebar = () => {
@@ -186,6 +201,7 @@ export default function ChatPage() {
                       sessions={sessions}
                       onNewChat={handleNewChat}
                       onDeleteSession={handleDeleteSession}
+                      onRenameSession={handleRenameSession}
                       isCollapsed={false}
                       onToggleCollapse={closeMobileSheet}
                       isMobileSheet={true}
@@ -267,6 +283,7 @@ export default function ChatPage() {
               currentSessionId={currentSession.id}
               onNewChat={handleNewChat}
               onDeleteSession={handleDeleteSession}
+              onRenameSession={handleRenameSession}
               isCollapsed={isSidebarCollapsed}
               onToggleCollapse={toggleSidebar}
             />

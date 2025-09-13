@@ -2,6 +2,23 @@ import { z } from "zod";
 import { protectedProcedure, createTRPCRouter } from "@/lib/trpc";
 import { aiService } from "@/lib/ai-service";
 
+function generateSessionTitle(firstMessage: string): string {
+  const message = firstMessage.toLowerCase();
+
+  if (message.includes("interview")) return "Interview Preparation";
+  if (message.includes("resume") || message.includes("cv")) return "Resume Review";
+  if (message.includes("career change") || message.includes("transition")) return "Career Transition";
+  if (message.includes("salary") || message.includes("negotiat")) return "Salary Negotiation";
+  if (message.includes("job search") || message.includes("looking for")) return "Job Search Strategy";
+  if (message.includes("skill") || message.includes("learn")) return "Skill Development";
+  if (message.includes("network")) return "Professional Networking";
+  if (message.includes("promotion") || message.includes("advance")) return "Career Advancement";
+
+  // Fallback: use first few words
+  const words = firstMessage.split(" ").slice(0, 4).join(" ");
+  return words.length > 30 ? words.substring(0, 30) + "..." : words;
+}
+
 export const chatRouter = createTRPCRouter({
   // Get all chat sessions for the current user
   getSessions: protectedProcedure.query(async ({ ctx }) => {
@@ -155,6 +172,14 @@ export const chatRouter = createTRPCRouter({
       content: z.string(),
     }))
     .mutation(async ({ ctx, input }) => {
+      // Check if this is the first user message to potentially rename the session
+      const existingUserMessages = await ctx.prisma.message.count({
+        where: {
+          chatSessionId: input.sessionId,
+          role: "user",
+        },
+      });
+
       // First, add the user message with sending status
       const userMessage = await ctx.prisma.message.create({
         data: {
@@ -170,6 +195,15 @@ export const chatRouter = createTRPCRouter({
         where: { id: userMessage.id },
         data: { status: "sent" },
       });
+
+      // Auto-generate title from first user message
+      if (existingUserMessages === 0) {
+        const generatedTitle = generateSessionTitle(input.content);
+        await ctx.prisma.chatSession.update({
+          where: { id: input.sessionId },
+          data: { name: generatedTitle },
+        });
+      }
 
       // Update session updatedAt
       await ctx.prisma.chatSession.update({
@@ -237,6 +271,31 @@ export const chatRouter = createTRPCRouter({
 
       if (result.count === 0) {
         throw new Error("Session not found or you don't have permission to delete it");
+      }
+
+      return { success: true };
+    }),
+
+  // Rename a chat session
+  renameSession: protectedProcedure
+    .input(z.object({
+      sessionId: z.string(),
+      name: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.prisma.chatSession.updateMany({
+        where: {
+          id: input.sessionId,
+          userId: ctx.session.user.id,
+        },
+        data: {
+          name: input.name,
+          updatedAt: new Date(),
+        },
+      });
+
+      if (result.count === 0) {
+        throw new Error("Session not found or you don't have permission to rename it");
       }
 
       return { success: true };

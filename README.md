@@ -1,6 +1,6 @@
-# Career Counselor AI
+# Career Counselor Oration AI
 
-A modern, responsive career counseling platform built with Next.js and TypeScript, featuring secure user authentication and a professional user interface.
+A comprehensive, full-stack career counseling platform built with Next.js 15, TypeScript, and modern web technologies. This application provides intelligent AI-powered career guidance with secure authentication, real-time chat functionality, and professional user experience.
 
 ## 🚀 Live Demo
 
@@ -8,76 +8,83 @@ A modern, responsive career counseling platform built with Next.js and TypeScrip
 
 ## ✨ Key Features
 
-### 🔐 **Authentication System**
-- **Email & Password Registration**: Secure user account creation with password hashing
+### 🤖 **AI Career Counseling**
+- **Intelligent AI Assistant**: Powered by OpenAI GPT models for professional career guidance
+- **Context-Aware Conversations**: Maintains conversation history and context across sessions
+- **Comprehensive Career Advice**: Covers resume review, interview prep, career transitions, salary negotiation, and more
+- **Smart Session Naming**: Automatically generates meaningful session titles based on conversation content
+
+### 🔐 **Complete Authentication System**
+- **Email & Password Registration**: Secure user account creation with bcrypt password hashing
 - **GitHub OAuth Integration**: One-click login with GitHub accounts
-- **JWT Session Management**: Secure, persistent user sessions
-- **Protected Routes**: Authentication-based access control
+- **JWT Session Management**: Secure, persistent user sessions with NextAuth.js
+- **Protected Routes**: Authentication-based access control throughout the application
+
+### 💬 **Advanced Chat System**
+- **Real-time Messaging**: Instant message delivery with status indicators
+- **Message Persistence**: All conversations automatically saved to PostgreSQL database
+- **Chat Session Management**: Create, view, rename, and delete multiple conversation sessions
+- **Message History**: Complete conversation history with pagination for large chats
+- **Typing Indicators**: Visual feedback during AI response generation
 
 ### 🎨 **Modern User Interface**
 - **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 - **Glassmorphism Effects**: Modern UI with backdrop blur and transparency
-- **Gradient Backgrounds**: Professional purple-to-pink color scheme
 - **Smooth Animations**: Polished transitions and hover effects
-- **Message Status Indicators**: Visual feedback for message delivery states
-- **Real-time Typing Indicators**: Shows when AI is generating responses
-
-### 👤 **User Management**
-- **Profile Pages**: User dashboard with account information
-- **Session Persistence**: Stay logged in across browser sessions
-- **Account Security**: Protected user data and secure authentication
-
-### 💬 **Advanced Chat Features**
-- **AI Career Counseling**: Intelligent responses powered by OpenAI/Together AI
-- **Message Persistence**: All conversations saved to database
-- **Chat Session Management**: Create, view, and manage multiple conversations
-- **Real-time Status Updates**: Message delivery and read status indicators
-- **Typing Indicators**: Visual feedback during AI response generation
-- **Performance Optimized**: Efficient caching and pagination for large chat histories
-
-### 📱 **Professional Design**
-- **Landing Page**: Hero section with feature highlights
-- **Navigation**: Intuitive user flow and page transitions
-- **Loading States**: Professional loading indicators and typing animations
-- **Error Handling**: User-friendly error messages and recovery
+- **Mobile-First Design**: Collapsible sidebar and mobile-optimized chat interface
 
 ## 🛠️ Tech Stack
 
+### **Frontend**
 - **Framework**: Next.js 15.5.2 (App Router)
 - **Language**: TypeScript (Strict Mode)
+- **Styling**: Tailwind CSS 4.0
+- **UI Components**: ShadCN/UI with Radix UI primitives
+- **State Management**: TanStack Query (React Query) for server state
+
+### **Backend & API**
+- **API Layer**: tRPC for type-safe APIs
 - **Authentication**: NextAuth.js with JWT Strategy
 - **Database**: PostgreSQL with Prisma ORM
-- **Styling**: Tailwind CSS
-- **UI Components**: ShadCN/UI
-- **Deployment**: Vercel
-- **Database Hosting**: Supabase
+- **AI Integration**: OpenAI API with configurable models
+- **Data Validation**: Zod schemas for runtime type safety
 
-## 🏗️ Architecture
+### **Deployment & Infrastructure**
+- **Hosting**: Vercel (Serverless deployment)
+- **Database Hosting**: Supabase (Managed PostgreSQL)
+- **Environment**: Node.js 18+ with TypeScript compilation
+
+## 🏗️ Project Structure
 
 ```
-├── app/                    # Next.js App Router
-│   ├── api/auth/          # NextAuth.js API routes
-│   ├── auth/              # Authentication pages
-│   ├── profile/           # User profile page
-│   ├── chat/              # Chat interface (UI ready)
-│   └── page.tsx           # Landing page
-├── components/            # Reusable UI components
-│   ├── ui/               # ShadCN/UI components
-│   └── providers/        # Context providers
-├── lib/                   # Utility libraries
-│   ├── auth.ts           # NextAuth configuration
-│   ├── prisma.ts         # Database client
-│   └── utils.ts          # Helper functions
-└── prisma/               # Database schema
-    └── schema.prisma     # Prisma data models
+├── app/                           # Next.js App Router
+│   ├── api/                      # API Routes (NextAuth, tRPC)
+│   ├── auth/                     # Authentication pages
+│   ├── chat/                     # Chat interface
+│   ├── history/                  # Chat history page
+│   └── profile/                  # User profile page
+├── components/                    # Reusable UI components
+│   ├── ui/                      # ShadCN/UI components
+│   ├── chat-bubble.tsx          # Message display component
+│   ├── chat-box.tsx             # Message input component
+│   └── session-list.tsx         # Chat session management
+├── lib/                          # Core libraries
+│   ├── routers/                 # tRPC routers
+│   ├── ai-service.ts            # OpenAI integration
+│   ├── auth.ts                  # NextAuth configuration
+│   └── prisma.ts                # Database client
+├── prisma/                       # Database schema
+│   └── schema.prisma            # Prisma data models
+└── hooks/                        # Custom React hooks
+    └── use-session.ts           # Chat session management
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
-- npm or yarn
-- PostgreSQL database
+- **Node.js**: Version 18 or higher
+- **Database**: PostgreSQL (local or cloud-hosted)
+- **AI API Key**: OpenAI API key for AI functionality
 
 ### Installation
 
@@ -93,24 +100,19 @@ A modern, responsive career counseling platform built with Next.js and TypeScrip
    ```
 
 3. **Environment Setup**
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   Configure the following environment variables:
+   Create a `.env.local` file:
    ```env
    # Database
    DATABASE_URL="postgresql://username:password@host:port/database"
-
+   
    # NextAuth.js
    NEXTAUTH_URL="http://localhost:3000"
    NEXTAUTH_SECRET="your-secret-key-here"
-
-   # AI Provider Configuration
-   AI_PROVIDER="openai"  # or "together"
-   AI_API_KEY="your-ai-api-key-here"
+   
+   # AI Configuration
+   AI_API_KEY="your-openai-api-key-here"
    AI_MODEL="gpt-3.5-turbo"
-
+   
    # GitHub OAuth (Optional)
    GITHUB_CLIENT_ID="your-github-client-id"
    GITHUB_CLIENT_SECRET="your-github-client-secret"
@@ -118,10 +120,7 @@ A modern, responsive career counseling platform built with Next.js and TypeScrip
 
 4. **Database Setup**
    ```bash
-   # Generate Prisma client
    npx prisma generate
-
-   # Push schema to database
    npx prisma db push
    ```
 
@@ -135,205 +134,76 @@ A modern, responsive career counseling platform built with Next.js and TypeScrip
 ## 🔧 Available Scripts
 
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
+# Development
+npm run dev              # Start development server
+npm run build           # Build for production
+npm run start           # Start production server
+npm run lint            # Run ESLint
+
+# Database
+npx prisma studio       # Open Prisma Studio
+npx prisma generate     # Generate Prisma client
+npx prisma db push      # Push schema to database
 ```
 
 ## 🗄️ Database Schema
 
-### User Model
-```prisma
-model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  name          String?
-  password      String?   // Hashed password for credentials auth
-  image         String?
-  emailVerified DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+The application uses a well-designed PostgreSQL schema with proper relationships and indexing.
 
-  accounts      Account[]
-  sessions      Session[]
-  chatSessions  ChatSession[]
-}
-```
+### Core Models
+- **User**: User accounts with authentication data
+- **ChatSession**: Individual chat conversations
+- **Message**: Individual messages within chat sessions
+- **Account/Session**: NextAuth.js authentication models
 
-### Authentication Models
-```prisma
-model Account {
-  id                String  @id @default(uuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(uuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-```
-
-## 🔐 Authentication Setup
-
-### GitHub OAuth (Optional)
-
-1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
-2. Create a new OAuth App
-3. Set Authorization callback URL to: `http://localhost:3000/api/auth/callback/github`
-4. Add the Client ID and Client Secret to your `.env.local`
-
-### Features
-- **Secure Registration**: Password hashing with bcrypt
-- **OAuth Integration**: GitHub social login
-- **Session Security**: JWT-based authentication
-- **Route Protection**: Automatic redirects for unauthenticated users
-
-## 🎨 UI Components
-
-The application uses ShadCN/UI components with custom styling:
-
-- **Button**: Primary and secondary action buttons
-- **Card**: Content containers with glassmorphism effects
-- **Input**: Form inputs with validation
-- **Avatar**: User profile images
-- **Badge**: Status indicators
-- **Tabs**: Navigation between sign-in and sign-up
-
-## 📱 Responsive Design
-
-- **Desktop**: Full-width layout with sidebar-ready design
-- **Tablet**: Optimized spacing and touch targets
-- **Mobile**: Single-column layout with collapsible navigation
-- **Accessibility**: WCAG compliant color contrast and keyboard navigation
+### Key Features
+- **UUID Primary Keys**: Better security and scalability
+- **Proper Indexing**: Optimized queries with strategic database indexes
+- **Cascade Deletion**: Automatic cleanup when users or sessions are deleted
+- **Type Safety**: Enums for message roles and status tracking
 
 ## 🚀 Deployment
 
-### Vercel Deployment
+### **Vercel Deployment**
 
 1. **Connect Repository**: Link your GitHub repository to Vercel
 2. **Environment Variables**: Configure production environment variables
-3. **Database**: Set up production PostgreSQL database (Supabase recommended)
-4. **Build Settings**: Next.js 15+ with Node.js 18+
+3. **Database Setup**: Use Supabase, Neon, or any PostgreSQL provider
+4. **Deploy**: Automatic deployment on push to main branch
 
-### Production Environment Variables
+### **Production Environment Variables**
 ```env
 DATABASE_URL="postgresql://..."
 NEXTAUTH_URL="https://your-app.vercel.app"
 NEXTAUTH_SECRET="production-secret-key"
-GITHUB_CLIENT_ID="production-client-id"
-GITHUB_CLIENT_SECRET="production-client-secret"
+AI_API_KEY="your-openai-api-key"
+GITHUB_CLIENT_ID="your-github-client-id"
+GITHUB_CLIENT_SECRET="your-github-client-secret"
 ```
 
-## 🐛 Troubleshooting
+## 📈 Assignment Requirements
 
-### Common Issues
+### **✅ Completed Features**
+- [x] Next.js application with TypeScript (strict mode)
+- [x] Complete authentication system (NextAuth.js)
+- [x] AI Career Counselor Chat with OpenAI integration
+- [x] Message persistence with database storage
+- [x] Chat history and session management
+- [x] Responsive design for mobile and desktop
+- [x] tRPC and TanStack Query implementation
+- [x] Vercel deployment with live URL
+- [x] Comprehensive documentation
 
-**Database Connection Error**
-```bash
-# Check database URL in .env.local
-# Ensure PostgreSQL is running
-npx prisma db push
-```
+## 📋 Additional Documentation
 
-**Authentication Issues**
-```bash
-# Verify NEXTAUTH_SECRET is set
-# Check GitHub OAuth credentials
-# Clear browser cookies and try again
-```
-
-**Build Errors**
-```bash
-# Clear Next.js cache
-rm -rf .next
-npm run build
-```
-
-## 📊 Performance
-
-- **Fast Loading**: Optimized with Next.js App Router
-- **Efficient Bundling**: Tree-shaking and code splitting
-- **Database Optimization**: Indexed queries with Prisma
-- **Image Optimization**: Next.js automatic image optimization
-
-## � AI Configuration
-
-The application supports multiple AI providers for flexible deployment:
-
-### Supported Providers
-
-1. **OpenAI** (`AI_PROVIDER=openai`)
-   - Models: GPT-3.5-turbo, GPT-4, GPT-4-turbo
-   - Environment: `AI_API_KEY`, `AI_MODEL`
-
-2. **Together AI** (`AI_PROVIDER=together`)
-   - Free tier available
-   - Models: Llama, Mixtral, and other open-source models
-   - Environment: `AI_API_KEY`, `AI_MODEL`
-
-### Adding New Providers
-
-The AI service is designed to be extensible. To add a new provider:
-
-1. Create a new class implementing the `AIProvider` interface
-2. Add it to the `AIService` constructor
-3. Set the appropriate environment variables
-
-### Example Configuration
-
-```env
-# Use OpenAI with GPT-4
-AI_PROVIDER=openai
-AI_API_KEY=sk-your-key-here
-AI_MODEL=gpt-4
-
-# Use Together AI with Llama
-AI_PROVIDER=together
-AI_API_KEY=your-together-key-here
-AI_MODEL=meta-llama/Llama-2-70b-chat-hf
-```
-
-## �🤝 Contributing
-
-This project demonstrates modern full-stack development practices with:
-- TypeScript for type safety
-- Component-based architecture
-- Secure authentication patterns
-- Responsive design principles
-- Database optimization techniques
+- **[DEVELOPMENT.md](DEVELOPMENT.md)**: Detailed development documentation and implementation status
+- **[API Documentation](lib/routers/)**: tRPC API endpoint documentation
+- **[Database Schema](prisma/schema.prisma)**: Complete database schema
 
 ## 📄 License
 
-This project is part of an assignment submission for Oration AI Software Engineer position.
-
-## 📞 Support
-
-For questions about this application, please refer to the codebase and documentation.
-
-## 📋 Development Roadmap
-
-For detailed project status, architecture decisions, and implementation roadmap, see [DEVELOPMENT.md](DEVELOPMENT.md).
-
 ---
 
-**Built with ❤️ using Next.js, TypeScript, and modern web technologies**
+**Built using Next.js 15, TypeScript, tRPC, Prisma, and modern web technologies**
 
-*Last updated: September 11, 2025*
+*Last updated: September 2025*
