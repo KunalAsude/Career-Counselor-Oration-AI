@@ -117,7 +117,7 @@ export default function ChatPage() {
   // Don't render anything while checking authentication
   if (status === "loading" || !session) {
     return (
-      <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative overflow-hidden dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900 flex items-center justify-center">
+      <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative overflow-hidden dark:from-slate-900 dark:via-purple-900/30 dark:to-purple-950 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 bg-card/50 backdrop-blur-md rounded-full mb-4">
             <MessageCircle className="h-6 w-6 text-primary animate-pulse" />
@@ -178,10 +178,10 @@ export default function ChatPage() {
 
   if (!currentSession) {
     return (
-      <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative overflow-hidden dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+      <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative overflow-hidden dark:from-slate-900 dark:via-purple-900/30 dark:to-purple-950">
         {/* Background Effects */}
         <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 dark:bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 dark:bg-purple-500/25 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 dark:bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
 
@@ -241,10 +241,10 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative overflow-hidden dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+    <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative overflow-hidden dark:from-slate-900 dark:via-purple-900/30 dark:to-purple-950">
       {/* Background Effects */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 dark:bg-purple-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 dark:bg-purple-500/25 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 dark:bg-blue-500/20 rounded-full blur-3xl"></div>
       </div>
 

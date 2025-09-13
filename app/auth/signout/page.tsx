@@ -13,12 +13,12 @@ export default async function SignOutPage() {
   }
 
   return (
-    <div className="auth-page bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+    <div className="auth-page bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative dark:from-slate-900 dark:via-purple-900/30 dark:to-purple-950">
       {/* Background Effects */}
       <div className="absolute inset-0 opacity-40">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 dark:from-purple-500/10 dark:to-blue-500/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 dark:from-purple-500/15 dark:to-blue-500/15"></div>
       </div>
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 dark:bg-purple-500/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 dark:bg-purple-500/25 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 dark:bg-blue-500/20 rounded-full blur-3xl"></div>
 
       <div className="auth-content p-4">
