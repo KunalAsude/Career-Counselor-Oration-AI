@@ -22,7 +22,7 @@ export default function ChatSessionPage() {
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  const { currentSession, sessions, isLoading, sessionError, createNewSession, sendMessage, deleteSession } = useChatSession(sessionId)
+  const { currentSession, sessions, isLoading, sessionError, createNewSession, sendMessage, deleteSession, renameSession } = useChatSession(sessionId)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   // Redirect to signin if not authenticated
@@ -133,9 +133,25 @@ export default function ChatSessionPage() {
 
   const handleDeleteSession = (sessionIdToDelete: string) => {
     deleteSession(sessionIdToDelete)
+    
+    // If we're deleting the current session, redirect to the first available session or history
     if (sessionIdToDelete === sessionId) {
-      router.push("/chat")
+      if (sessions && sessions.length > 1) {
+        // Find the first session that's not the one being deleted
+        const nextSession = sessions.find(s => s.id !== sessionIdToDelete)
+        if (nextSession) {
+          router.push(`/chat/${nextSession.id}`)
+        } else {
+          router.push("/history")
+        }
+      } else {
+        router.push("/history")
+      }
     }
+  }
+
+  const handleRenameSession = (sessionIdToRename: string, newTitle: string) => {
+    renameSession(sessionIdToRename, newTitle)
   }
 
   const toggleSidebar = () => {
@@ -261,6 +277,7 @@ export default function ChatSessionPage() {
                 currentSessionId={sessionId}
                 onNewChat={handleNewChat}
                 onDeleteSession={handleDeleteSession}
+                onRenameSession={handleRenameSession}
                 isCollapsed={isSidebarCollapsed}
                 onToggleCollapse={toggleSidebar}
               />

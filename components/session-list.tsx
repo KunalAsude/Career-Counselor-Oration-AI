@@ -1,11 +1,13 @@
 "use client"
 import Link from "next/link"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
-import { MessageCircle, Plus, Trash2, MoreVertical, ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
+import { MessageCircle, Plus, Trash2, MoreVertical, ChevronLeft, ChevronRight, Sparkles, Edit } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { RenameSessionDialog } from "@/components/rename-session-dialog"
 import type { ChatSession } from "@/hooks/use-session"
 
 interface SessionListProps {
@@ -13,6 +15,7 @@ interface SessionListProps {
   currentSessionId?: string
   onNewChat: () => void
   onDeleteSession?: (sessionId: string) => void
+  onRenameSession?: (sessionId: string, newTitle: string) => void
   isCollapsed?: boolean
   onToggleCollapse?: () => void
   isMobileSheet?: boolean
@@ -23,10 +26,26 @@ export function SessionList({
   currentSessionId,
   onNewChat,
   onDeleteSession,
+  onRenameSession,
   isCollapsed = false,
   onToggleCollapse,
   isMobileSheet = false,
 }: SessionListProps) {
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false)
+  const [sessionToRename, setSessionToRename] = useState<ChatSession | null>(null)
+
+  const handleRenameClick = (session: ChatSession) => {
+    setSessionToRename(session)
+    setRenameDialogOpen(true)
+  }
+
+  const handleRenameConfirm = (newTitle: string) => {
+    if (sessionToRename && onRenameSession) {
+      onRenameSession(sessionToRename.id, newTitle)
+      setRenameDialogOpen(false)
+      setSessionToRename(null)
+    }
+  }
   return (
     <div
       className={cn(
@@ -41,7 +60,7 @@ export function SessionList({
         {!isCollapsed ? (
           <Button
             onClick={onNewChat}
-            className="flex-1 justify-start bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/95 hover:via-primary/85 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 mr-3 border border-primary/20 rounded-xl font-medium hover:scale-[1.02] active:scale-[0.98]"
+            className="flex-1 justify-start bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/95 hover:via-primary/85 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 mr-3 border border-primary/20 rounded-xl font-medium hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             size="sm"
           >
             <div className="flex items-center justify-center w-5 h-5 mr-2 bg-white/20 rounded-full">
@@ -52,7 +71,7 @@ export function SessionList({
         ) : (
           <Button
             onClick={onNewChat}
-            className="w-12 h-12 p-0 bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/95 hover:via-primary/85 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 rounded-full border border-primary/20 hover:scale-105 active:scale-95"
+            className="w-12 h-12 p-0 bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/95 hover:via-primary/85 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 rounded-full border border-primary/20 hover:scale-105 active:scale-95 cursor-pointer"
             size="sm"
             title="New Chat"
           >
@@ -66,7 +85,7 @@ export function SessionList({
             variant="ghost"
             size="icon"
             className={cn(
-              "hover:bg-accent text-foreground flex-shrink-0 border border-border/50 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 rounded-lg",
+              "hover:bg-accent text-foreground flex-shrink-0 border border-border/50 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 rounded-lg cursor-pointer",
               isCollapsed ? "h-8 w-8" : "h-8 w-8 ml-2"
             )}
           >
@@ -133,7 +152,7 @@ export function SessionList({
                     ) : (
                       <div className="space-y-2 pr-8">
                         <h4 className="text-sm font-medium line-clamp-1 text-foreground group-hover:text-primary transition-colors">
-                          New Career Chat
+                          {session.name}
                         </h4>
                         <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                           {session.messages.length > 0 ? session.messages[0].content : "Start your career journey..."}
@@ -149,25 +168,42 @@ export function SessionList({
                   </Card>
                 </Link>
 
-                {onDeleteSession && !isCollapsed && (
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {(onDeleteSession || onRenameSession) && !isCollapsed && (
+                  <div className="absolute top-2 right-2 opacity-60 group-hover:opacity-100 transition-opacity">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-destructive/20 text-foreground">
+                        <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-accent/50 text-foreground cursor-pointer bg-background/80 backdrop-blur-sm border border-border/50">
                           <MoreVertical className="h-3 w-3" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-popover border-border">
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.preventDefault()
-                            onDeleteSession(session.id)
-                          }}
-                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
+                      <DropdownMenuContent align="center" side="top" className="bg-popover border-border shadow-lg">
+                        {onRenameSession && (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.preventDefault()
+                              handleRenameClick(session)
+                            }}
+                            className="focus:bg-accent cursor-pointer hover:bg-accent/50"
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Rename Session
+                          </DropdownMenuItem>
+                        )}
+                        {onRenameSession && onDeleteSession && (
+                          <div className="border-t border-border my-1"></div>
+                        )}
+                        {onDeleteSession && (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.preventDefault()
+                              onDeleteSession(session.id)
+                            }}
+                            className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Session
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -178,6 +214,13 @@ export function SessionList({
         </div>
         </ScrollArea>
       </div>
+
+      <RenameSessionDialog
+        isOpen={renameDialogOpen}
+        onClose={() => setRenameDialogOpen(false)}
+        onRename={handleRenameConfirm}
+        currentTitle={sessionToRename?.name || ""}
+      />
     </div>
   )
 }

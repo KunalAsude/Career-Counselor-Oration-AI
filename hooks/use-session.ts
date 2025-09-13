@@ -76,7 +76,12 @@ export function useSession(sessionId?: string) {
       return newSession
     },
     onError: (error) => {
-      toast.error("Failed to create session: " + error.message)
+      // Show user-friendly error message
+      if (error.message.includes("database") || error.message.includes("connection") || error.message.includes("network")) {
+        toast.error("Unable to connect to server. Please check your internet connection and try again.")
+      } else {
+        toast.error("Unable to create session. Please try again.")
+      }
     },
   })
 
@@ -133,7 +138,12 @@ export function useSession(sessionId?: string) {
       queryClient.invalidateQueries({ queryKey: [["chat", "getSessions"], { type: "query" }] })
     },
     onError: (error) => {
-      toast.error("Failed to send message: " + error.message)
+      // Show user-friendly error message
+      if (error.message.includes("database") || error.message.includes("connection") || error.message.includes("network")) {
+        toast.error("Unable to connect to server. Please check your internet connection and try again.")
+      } else {
+        toast.error("Unable to send message. Please try again.")
+      }
     },
   })
 
@@ -149,7 +159,30 @@ export function useSession(sessionId?: string) {
     onError: (error, variables) => {
       // Rollback optimistic update on error
       queryClient.invalidateQueries({ queryKey: [["chat", "getSessions"], { type: "query" }] })
-      toast.error("Failed to delete session: " + error.message)
+      
+      // Show user-friendly error message
+      if (error.message.includes("database") || error.message.includes("connection") || error.message.includes("network")) {
+        toast.error("Unable to connect to server. Please check your internet connection and try again.")
+      } else {
+        toast.error("Unable to delete session. Please try again.")
+      }
+    },
+  })
+
+  // Rename session mutation
+  const renameSessionMutation = trpc.chat.renameSession.useMutation({
+    onSuccess: () => {
+      // Invalidate sessions list to refresh with new name
+      queryClient.invalidateQueries({ queryKey: [["chat", "getSessions"], { type: "query" }] })
+      toast.success("Session renamed!")
+    },
+    onError: (error) => {
+      // Show user-friendly error message
+      if (error.message.includes("database") || error.message.includes("connection") || error.message.includes("network")) {
+        toast.error("Unable to connect to server. Please check your internet connection and try again.")
+      } else {
+        toast.error("Unable to rename session. Please try again.")
+      }
     },
   })
 
@@ -360,6 +393,13 @@ export function useSession(sessionId?: string) {
     [deleteSessionMutation, queryClient]
   )
 
+  const renameSession = useCallback(
+    (sessionId: string, name: string) => {
+      renameSessionMutation.mutate({ sessionId, name })
+    },
+    [renameSessionMutation]
+  )
+
   return {
     currentSession,
     sessions,
@@ -371,6 +411,7 @@ export function useSession(sessionId?: string) {
     sendMessage,
     sendMessageStreaming,
     deleteSession,
+    renameSession,
     loadMoreMessages,
     hasMoreMessages: currentSession?.hasMore || false,
   }

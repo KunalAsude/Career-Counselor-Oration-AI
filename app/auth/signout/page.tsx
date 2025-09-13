@@ -29,7 +29,7 @@ export default async function SignOutPage() {
             </div>
             <CardTitle className="text-2xl font-bold text-foreground">Sign Out</CardTitle>
             <CardDescription className="text-muted-foreground">
-              Are you sure you want to sign out of Career Counselor AI?
+              Are you sure you want to sign out of Career Counselor?
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

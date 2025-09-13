@@ -1,11 +1,25 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Bot } from "lucide-react"
+import { useState, useEffect } from "react"
 
 interface TypingIndicatorProps {
   isVisible: boolean
 }
 
 export function TypingIndicator({ isVisible }: TypingIndicatorProps) {
+  const [showThinking, setShowThinking] = useState(true)
+
+  useEffect(() => {
+    if (isVisible) {
+      setShowThinking(true)
+      const timer = setTimeout(() => {
+        setShowThinking(false)
+      }, 2000) // Switch to "Typing..." after 2 seconds
+
+      return () => clearTimeout(timer)
+    }
+  }, [isVisible])
+
   if (!isVisible) return null
 
     return (
@@ -26,7 +40,9 @@ export function TypingIndicator({ isVisible }: TypingIndicatorProps) {
                 <span className="dot bg-primary/60 inline-block w-2 h-2 rounded-full mx-0.5 animate-bounce" style={{ animationDelay: '0.2s' }}></span>
                 <span className="dot bg-primary/60 inline-block w-2 h-2 rounded-full mx-0.5 animate-bounce" style={{ animationDelay: '0.4s' }}></span>
               </div>
-              <span className="text-muted-foreground text-xs">Typing...</span>
+              <span className="text-muted-foreground text-xs">
+                {showThinking ? " Thinking" : "Typing..."}
+              </span>
             </div>
           </div>
         </div>
