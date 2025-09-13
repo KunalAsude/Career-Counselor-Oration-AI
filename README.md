@@ -45,7 +45,7 @@ A comprehensive, full-stack career counseling platform built with Next.js 15, Ty
 ![Sign In](public/ss/auth-carrerai.png)
 
 ### Chat History Management
-![Chat Sessions](public/ss/history-carrerai.png
+![Chat Sessions](public/ss/history-carrerai.png)
 
 ## 🛠️ Tech Stack
 
